@@ -1,0 +1,6 @@
+Flask
+flask-cors
+gunicorn
+paddleocr==3.7.0
+paddlepaddle==3.2.2
+opencv-python-headless
