@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { FileText } from "lucide-react";
+import { FileText, LayoutList, Calendar } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Card, CardContent } from "../components/ui/Card";
 import { ScanFilters } from "../components/history/ScanFilters";
 import { ScansTable } from "../components/history/ScansTable";
+import { ScanCalendar } from "../components/history/ScanCalendar";
 import { ScanDetailModal } from "../components/history/ScanDetailModal";
 import { fetchScans } from "../api/scans";
 
@@ -21,6 +22,7 @@ export function History() {
   const [status, setStatus] = useState("");
   const [documentType, setDocumentType] = useState("");
 
+  const [view, setView] = useState("table"); // "table" ou "calendar"
   const [selectedScan, setSelectedScan] = useState(null);
 
   useEffect(() => {
@@ -41,9 +43,11 @@ export function History() {
 
   const loadScans = useCallback(() => {
     setLoading(true);
+    // En mode calendrier, on charge jusqu'à 500 scans (pour couvrir plusieurs mois)
+    const perPage = view === "calendar" ? 500 : 20;
     fetchScans({
-      page,
-      perPage: 20,
+      page: view === "calendar" ? 1 : page,
+      perPage,
       status,
       documentType,
       search: debouncedSearch,
@@ -59,7 +63,7 @@ export function History() {
         setPages(1);
       })
       .finally(() => setLoading(false));
-  }, [page, status, documentType, debouncedSearch]);
+  }, [page, status, documentType, debouncedSearch, view]);
 
   useEffect(() => {
     loadScans();
@@ -86,6 +90,32 @@ export function History() {
                 {total} {total === 1 ? t("history.document") : t("history.documents")}
               </span>
             </div>
+
+            {/* Toggle Tableau / Calendrier */}
+            <div className="flex rounded-lg border border-border bg-surface-2/40 p-1">
+              <button
+                onClick={() => setView("table")}
+                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-medium transition-colors ${
+                  view === "table"
+                    ? "bg-primary/20 text-primary"
+                    : "text-text-muted hover:text-text-primary"
+                }`}
+              >
+                <LayoutList className="h-3.5 w-3.5" />
+                {t("calendar.tableView")}
+              </button>
+              <button
+                onClick={() => setView("calendar")}
+                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-medium transition-colors ${
+                  view === "calendar"
+                    ? "bg-primary/20 text-primary"
+                    : "text-text-muted hover:text-text-primary"
+                }`}
+              >
+                <Calendar className="h-3.5 w-3.5" />
+                {t("calendar.calendarView")}
+              </button>
+            </div>
           </div>
 
           <ScanFilters
@@ -106,28 +136,34 @@ export function History() {
         </CardContent>
       </Card>
 
-      <ScansTable scans={scans} loading={loading} onRowClick={setSelectedScan} />
+      {view === "table" ? (
+        <>
+          <ScansTable scans={scans} loading={loading} onRowClick={setSelectedScan} />
 
-      {pages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-2">
-          <button
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="rounded-lg border border-border px-3 py-1.5 text-xs text-text-secondary transition-colors hover:bg-white/5 disabled:opacity-40"
-          >
-            {t("common.previous")}
-          </button>
-          <span className="px-3 text-xs text-text-muted">
-            Page {page} / {pages}
-          </span>
-          <button
-            disabled={page >= pages}
-            onClick={() => setPage((p) => Math.min(pages, p + 1))}
-            className="rounded-lg border border-border px-3 py-1.5 text-xs text-text-secondary transition-colors hover:bg-white/5 disabled:opacity-40"
-          >
-            {t("common.next")}
-          </button>
-        </div>
+          {pages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <button
+                disabled={page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="rounded-lg border border-border px-3 py-1.5 text-xs text-text-secondary transition-colors hover:bg-white/5 disabled:opacity-40"
+              >
+                {t("common.previous")}
+              </button>
+              <span className="px-3 text-xs text-text-muted">
+                Page {page} / {pages}
+              </span>
+              <button
+                disabled={page >= pages}
+                onClick={() => setPage((p) => Math.min(pages, p + 1))}
+                className="rounded-lg border border-border px-3 py-1.5 text-xs text-text-secondary transition-colors hover:bg-white/5 disabled:opacity-40"
+              >
+                {t("common.next")}
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        <ScanCalendar scans={scans} />
       )}
 
       <ScanDetailModal scan={selectedScan} onClose={() => setSelectedScan(null)} />

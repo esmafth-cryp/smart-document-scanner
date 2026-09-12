@@ -146,6 +146,13 @@
     "noResults": "Aucun scan pour l'instant",
     "emptyHint": "Scannez un document pour le voir apparaître ici."
   },
+  "calendar": {
+    "tableView": "Tableau",
+    "calendarView": "Calendrier",
+    "today": "Aujourd'hui",
+    "scansOn": "Scans du",
+    "noScans": "Aucun scan ce jour"
+  },
   "detail": {
     "title": "Détail du scan",
     "extractedInfo": "Informations extraites (éditables)",
