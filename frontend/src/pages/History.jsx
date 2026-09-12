@@ -21,7 +21,14 @@ export function History() {
 
   const [selectedScan, setSelectedScan] = useState(null);
 
-  // Debounce search
+  useEffect(() => {
+    const stored = sessionStorage.getItem("sds_search");
+    if (stored) {
+      setSearch(stored);
+      sessionStorage.removeItem("sds_search");
+    }
+  }, []);
+
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedSearch(search);

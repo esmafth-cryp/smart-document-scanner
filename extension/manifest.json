@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Smart Document Scanner",
+  "version": "1.0.0",
+  "description": "Capturez et analysez des documents directement depuis votre navigateur.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": [
+    "http://localhost:5000/*",
+    "http://localhost:8080/*",
+    "http://127.0.0.1:5000/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Smart Document Scanner"
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}

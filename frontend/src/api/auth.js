@@ -73,3 +73,47 @@ export async function fetchUsers() {
 export function logout() {
   clearSession();
 }
+async function adminFetch(url, options = {}) {
+  const token = getToken();
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(url, { ...options, headers });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || "Erreur");
+  }
+  return data;
+}
+
+export async function adminCreateUser(payload) {
+  return adminFetch("/api/admin/users", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function adminUpdateUser(userId, payload) {
+  return adminFetch(`/api/admin/users/${userId}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function adminDeleteUser(userId) {
+  return adminFetch(`/api/admin/users/${userId}`, {
+    method: "DELETE",
+  });
+}
+export async function changePassword(oldPassword, newPassword) {
+  return adminFetch("/api/auth/change-password", {
+    method: "POST",
+    body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+  });
+}
+export async function fetchNotifications() {
+  return adminFetch("/api/notifications");
+}

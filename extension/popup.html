@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        width: 340px;
+        font-family: -apple-system, system-ui, sans-serif;
+        background: #0B0F1A;
+        color: #F8FAFC;
+        padding: 16px;
+      }
+      .header {
+        display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+      }
+      .logo {
+        width: 32px; height: 32px; border-radius: 8px;
+        background: linear-gradient(135deg, #6366F1, #8B5CF6);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; color: #fff;
+      }
+      h1 { font-size: 14px; font-weight: 600; }
+      p.sub { font-size: 11px; color: #94A3B8; }
+      button {
+        width: 100%; padding: 10px; border: none; border-radius: 8px;
+        background: linear-gradient(135deg, #6366F1, #8B5CF6);
+        color: #fff; font-weight: 500; font-size: 13px; cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      button:hover { opacity: 0.9; }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
+      #status { margin-top: 12px; font-size: 11px; color: #94A3B8; min-height: 16px; }
+      #result {
+        margin-top: 12px; padding: 10px; border-radius: 8px;
+        background: #131826; border: 1px solid rgba(255,255,255,0.06);
+        max-height: 200px; overflow-y: auto;
+        font-family: monospace; font-size: 10px;
+        white-space: pre-wrap; color: #94A3B8;
+      }
+      .error { color: #EF4444; }
+      .success { color: #10B981; }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="logo">S</div>
+      <div>
+        <h1>Smart Scanner</h1>
+        <p class="sub">Marsa Maroc</p>
+      </div>
+    </div>
+    <button id="capture">Capturer l'onglet actif</button>
+    <div id="status"></div>
+    <pre id="result"></pre>
+    <script src="popup.js"></script>
+  </body>
+</html>

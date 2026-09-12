@@ -15,10 +15,12 @@ import { Card, CardContent } from "./components/ui/Card";
 import { Button } from "./components/ui/Button";
 import { History } from "./pages/History";
 import { Dashboard } from "./pages/Dashboard";
+import { Admin } from "./pages/Admin";
+import { Settings } from "./pages/Settings";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
-import { useAuth } from "./contexts/AuthContext";
+import { ScanDetailModal } from "./components/history/ScanDetailModal";
 
-function ScanPage({ active, setActive }) {
+function ScanPage({ active, setActive, onSelectScan, onSeeAll }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [result, setResult] = useState(null);
@@ -93,6 +95,8 @@ function ScanPage({ active, setActive }) {
       onNavigate={setActive}
       title="Scanner un document"
       subtitle="Importez, analysez, validez et exportez vos documents"
+      onSelectScan={onSelectScan}
+      onSeeAll={onSeeAll}
     >
       <div className="flex h-full">
         <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto p-6">
@@ -169,6 +173,12 @@ function ScanPage({ active, setActive }) {
 
 export default function App() {
   const [active, setActive] = useState("scan");
+  const [searchedScan, setSearchedScan] = useState(null);
+
+  function handleSeeAll(query) {
+    if (query) sessionStorage.setItem("sds_search", query);
+    setActive("history");
+  }
 
   return (
     <ProtectedRoute>
@@ -181,8 +191,46 @@ export default function App() {
               onNavigate={setActive}
               title="Tableau de bord"
               subtitle="Vue d'ensemble de votre activité documentaire"
+              onSelectScan={setSearchedScan}
+              onSeeAll={handleSeeAll}
             >
               <Dashboard onNavigate={setActive} />
+            </AppLayout>
+          </div>
+        </>
+      )}
+
+      {active === "admin" && (
+        <>
+          <AmbientBackground />
+          <div className="relative z-10 h-full">
+            <AppLayout
+              active={active}
+              onNavigate={setActive}
+              title="Administration"
+              subtitle="Gérez les utilisateurs et les paramètres système"
+              onSelectScan={setSearchedScan}
+              onSeeAll={handleSeeAll}
+            >
+              <Admin />
+            </AppLayout>
+          </div>
+        </>
+      )}
+
+      {active === "settings" && (
+        <>
+          <AmbientBackground />
+          <div className="relative z-10 h-full">
+            <AppLayout
+              active={active}
+              onNavigate={setActive}
+              title="Paramètres"
+              subtitle="Gérez votre profil et vos préférences"
+              onSelectScan={setSearchedScan}
+              onSeeAll={handleSeeAll}
+            >
+              <Settings />
             </AppLayout>
           </div>
         </>
@@ -197,6 +245,8 @@ export default function App() {
               onNavigate={setActive}
               title="Historique"
               subtitle="Consultez tous les documents scannés"
+              onSelectScan={setSearchedScan}
+              onSeeAll={handleSeeAll}
             >
               <History />
             </AppLayout>
@@ -204,13 +254,28 @@ export default function App() {
         </>
       )}
 
-      {active !== "dashboard" && active !== "history" && (
-        <>
-          <AmbientBackground />
-          <div className="relative z-10">
-            <ScanPage active={active} setActive={setActive} />
-          </div>
-        </>
+      {active !== "dashboard" &&
+        active !== "history" &&
+        active !== "admin" &&
+        active !== "settings" && (
+          <>
+            <AmbientBackground />
+            <div className="relative z-10">
+              <ScanPage
+                active={active}
+                setActive={setActive}
+                onSelectScan={setSearchedScan}
+                onSeeAll={handleSeeAll}
+              />
+            </div>
+          </>
+        )}
+
+      {searchedScan && (
+        <ScanDetailModal
+          scan={searchedScan}
+          onClose={() => setSearchedScan(null)}
+        />
       )}
     </ProtectedRoute>
   );

@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FileScan, Mail, Lock, Loader2, ArrowRight } from "lucide-react";
+import { Mail, Lock, ArrowRight, FileScan } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { useAuth } from "../contexts/AuthContext";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { AmbientBackground } from "../components/neon/AmbientBackground";
+import { MarsaLogo } from "../components/brand/MarsaLogo";
 
 export function Login() {
   const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState("login");
-  const [email, setEmail] = useState("admin@marsamaroc.ma");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -48,17 +49,15 @@ export function Login() {
           transition={{ duration: 0.4 }}
           className="w-full max-w-md"
         >
-          {/* Logo */}
-          <div className="mb-8 flex flex-col items-center">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary shadow-lg shadow-primary/30">
-              <FileScan className="h-7 w-7 text-white" strokeWidth={2.2} />
+          {/* Logo Marsa Maroc stylisé */}
+          <div className="mb-8 flex flex-col items-center gap-4">
+            <MarsaLogo size="lg" />
+            <div className="flex items-center gap-2 rounded-full border border-border bg-surface/50 px-3 py-1.5">
+              <FileScan className="h-3.5 w-3.5 text-primary" />
+              <span className="text-xs font-medium text-text-primary">
+                Smart Document Scanner
+              </span>
             </div>
-            <h1 className="text-2xl font-semibold text-text-primary">
-              Smart Document Scanner
-            </h1>
-            <p className="mt-1 text-sm text-text-muted">
-              Plateforme d'analyse documentaire — Marsa Maroc
-            </p>
           </div>
 
           {/* Card */}
@@ -145,24 +144,10 @@ export function Login() {
                 {mode === "login" ? "Se connecter" : "Créer un compte"}
               </Button>
             </form>
-
-            {/* Demo hint */}
-            {mode === "login" && (
-              <div className="mt-5 rounded-lg border border-border bg-surface-2/30 p-3">
-                <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-text-muted">
-                  Comptes de démo
-                </p>
-                <div className="space-y-1 font-mono text-[10px] text-text-secondary">
-                  <p>admin@marsamaroc.ma / admin123</p>
-                  <p>agent@marsamaroc.ma / agent123</p>
-                  <p>viewer@marsamaroc.ma / viewer123</p>
-                </div>
-              </div>
-            )}
           </div>
 
           <p className="mt-6 text-center text-[11px] text-text-muted">
-            © 2026 Smart Document Scanner — Tous droits réservés
+            © 2026 Smart Document Scanner — Marsa Maroc
           </p>
         </motion.div>
       </div>

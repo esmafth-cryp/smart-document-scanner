@@ -1,9 +1,13 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, Bell, Sun, Moon, User, LogOut, ChevronDown } from "lucide-react";
+import { Sun, Moon, User, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useTheme } from "../../contexts/ThemeContext";
+import { NotificationsDropdown } from "./NotificationsDropdown";
+import { GlobalSearch } from "./GlobalSearch";
 
-export function Header({ title, subtitle, dark = true, onToggleTheme }) {
+export function Header({ title, subtitle, onSelectScan, onSeeAll }) {
   const { user, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -18,38 +22,25 @@ export function Header({ title, subtitle, dark = true, onToggleTheme }) {
   }, []);
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-border bg-surface/30 px-6 backdrop-blur-sm">
+    <header className="relative z-40 flex h-16 items-center justify-between border-b border-border bg-surface/30 px-6 backdrop-blur-sm">
       <div className="min-w-0">
         <h1 className="truncate text-base font-semibold text-text-primary">{title}</h1>
         {subtitle && <p className="truncate text-xs text-text-muted">{subtitle}</p>}
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Search */}
-        <div className="relative hidden md:block">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
-          <input
-            type="text"
-            placeholder="Rechercher..."
-            className="h-9 w-64 rounded-lg border border-border bg-surface-2/50 pl-9 pr-3 text-sm text-text-primary placeholder:text-text-muted focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
-          />
-        </div>
+        <GlobalSearch onSelectScan={onSelectScan} onSeeAll={onSeeAll} />
 
-        {/* Notifications */}
-        <button className="relative flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary">
-          <Bell className="h-4 w-4" />
-          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary" />
-        </button>
+        <NotificationsDropdown />
 
-        {/* Theme toggle */}
         <button
-          onClick={onToggleTheme}
+          onClick={toggleTheme}
+          title={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
           className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary"
         >
-          {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
 
-        {/* Avatar dropdown */}
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setOpen((o) => !o)}
@@ -66,7 +57,7 @@ export function Header({ title, subtitle, dark = true, onToggleTheme }) {
           </button>
 
           {open && (
-            <div className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-xl border border-border bg-[#0d1224] shadow-2xl">
+            <div className="absolute right-0 top-full z-[100] mt-2 w-64 overflow-hidden rounded-xl border border-border-strong bg-[#0d1224] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.9)]">
               <div className="border-b border-border p-3">
                 <p className="truncate text-sm font-medium text-text-primary">
                   {user?.full_name || "Utilisateur"}

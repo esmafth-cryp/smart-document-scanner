@@ -214,3 +214,35 @@ def export_scan(scan_id):
             },
         }
     )
+@scan_bp.get("/notifications")
+def list_notifications():
+    from models import AuditLog
+
+    logs = (
+        AuditLog.query.order_by(desc(AuditLog.created_at))
+        .limit(10)
+        .all()
+    )
+
+    items = []
+    for log in logs:
+        label = {
+            "scan.create": "Nouveau scan",
+            "scan.validate": "Scan validé",
+            "user.create": "Nouvel utilisateur créé",
+            "user.update": "Utilisateur modifié",
+            "user.delete": "Utilisateur supprimé",
+        }.get(log.action, log.action)
+
+        items.append(
+            {
+                "id": log.id,
+                "action": log.action,
+                "label": label,
+                "entity_type": log.entity_type,
+                "entity_id": log.entity_id,
+                "created_at": log.created_at.isoformat() if log.created_at else None,
+            }
+        )
+
+    return jsonify({"success": True, "items": items})

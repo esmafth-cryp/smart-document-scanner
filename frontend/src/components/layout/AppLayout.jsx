@@ -2,7 +2,15 @@ import { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 
-export function AppLayout({ active, onNavigate, title, subtitle, children, headerRight }) {
+export function AppLayout({
+  active,
+  onNavigate,
+  title,
+  subtitle,
+  children,
+  onSelectScan,
+  onSeeAll,
+}) {
   const [collapsed, setCollapsed] = useState(false);
   const [dark, setDark] = useState(true);
 
@@ -21,6 +29,8 @@ export function AppLayout({ active, onNavigate, title, subtitle, children, heade
           subtitle={subtitle}
           dark={dark}
           onToggleTheme={() => setDark((d) => !d)}
+          onSelectScan={onSelectScan}
+          onSeeAll={onSeeAll}
         />
         <main className="flex-1 overflow-hidden">{children}</main>
       </div>
