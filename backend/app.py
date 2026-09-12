@@ -10,6 +10,7 @@ from extensions import db, migrate, jwt
 
 from services.ocr_service import extract_text
 from services.parser_service import parse_document
+from routes.scan_routes import scan_bp
 
 
 def create_app():
@@ -35,6 +36,8 @@ def create_app():
     )
 
     from models import User, DocumentType, Scan, ExtractedField, Correction, AuditLog  # noqa
+
+    app.register_blueprint(scan_bp, url_prefix="/api")
 
     BASE_DIR = Path(__file__).resolve().parent
     UPLOAD_FOLDER = BASE_DIR / "uploads"
