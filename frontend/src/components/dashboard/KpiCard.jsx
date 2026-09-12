@@ -1,6 +1,9 @@
+import { useRef } from "react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/utils";
 import { AnimatedNumber } from "../ui/AnimatedNumber";
+import { DevInfo } from "../dev/DevInfo";
+import { useDevMode } from "../../contexts/DevModeContext";
 
 const COLOR_VARIANTS = {
   blue: {
@@ -27,6 +30,9 @@ const COLOR_VARIANTS = {
 
 export function KpiCard({ icon: Icon, label, value, subtitle, color = "blue", delay = 0 }) {
   const c = COLOR_VARIANTS[color] || COLOR_VARIANTS.blue;
+  const { devMode } = useDevMode();
+  const renderCount = useRef(0);
+  renderCount.current += 1;
 
   const isPercent = typeof value === "string" && value.includes("%");
   const numericValue = isPercent
@@ -34,51 +40,63 @@ export function KpiCard({ icon: Icon, label, value, subtitle, color = "blue", de
     : value;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.25, delay, ease: "easeOut" }}
-      className={cn(
-        "group relative overflow-hidden rounded-xl border bg-surface/40 p-5 backdrop-blur-sm transition-all hover:border-primary/40 hover:shadow-[0_0_30px_-10px_rgba(59,130,246,0.4)]",
-        c.border
-      )}
+    <DevInfo
+      name={`KpiCard[${label}]`}
+      props={{ icon: Icon?.name || "?", label, value, subtitle, color, delay }}
     >
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -2 }}
+        transition={{ duration: 0.25, delay, ease: "easeOut" }}
         className={cn(
-          "pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-30 blur-3xl transition-opacity group-hover:opacity-60",
-          c.glow
+          "group relative overflow-hidden rounded-xl border bg-surface/40 p-5 backdrop-blur-sm transition-all hover:border-primary/40 hover:shadow-[0_0_30px_-10px_rgba(59,130,246,0.4)]",
+          c.border
         )}
-      />
+      >
+        <div
+          className={cn(
+            "pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-30 blur-3xl transition-opacity group-hover:opacity-60",
+            c.glow
+          )}
+        />
 
-      <div className="relative flex items-start justify-between">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-wider text-text-muted">
-            {label}
-          </p>
-          <p className="mt-2 text-3xl font-semibold tabular-nums text-text-primary">
-            {isPercent ? (
-              <AnimatedNumber value={numericValue} suffix="%" />
-            ) : (
-              <AnimatedNumber value={numericValue} />
+        <div className="relative flex items-start justify-between">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-text-muted">
+              {label}
+            </p>
+            <p className="mt-2 text-3xl font-semibold tabular-nums text-text-primary">
+              {isPercent ? (
+                <AnimatedNumber value={numericValue} suffix="%" />
+              ) : (
+                <AnimatedNumber value={numericValue} />
+              )}
+            </p>
+            {subtitle && (
+              <p className="mt-1 text-xs text-text-secondary">{subtitle}</p>
             )}
-          </p>
-          {subtitle && (
-            <p className="mt-1 text-xs text-text-secondary">{subtitle}</p>
+          </div>
+
+          {Icon && (
+            <div
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-lg transition-transform group-hover:scale-110",
+                c.icon
+              )}
+            >
+              <Icon className="h-5 w-5" strokeWidth={2} />
+            </div>
           )}
         </div>
 
-        {Icon && (
-          <div
-            className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-lg transition-transform group-hover:scale-110",
-              c.icon
-            )}
-          >
-            <Icon className="h-5 w-5" strokeWidth={2} />
+     
+        {devMode && (
+          <div className="pointer-events-none absolute bottom-1 left-2 font-mono text-[8px] text-danger/60">
+            renders: {renderCount.current}
           </div>
         )}
-      </div>
-    </motion.div>
+      </motion.div>
+    </DevInfo>
   );
 }
