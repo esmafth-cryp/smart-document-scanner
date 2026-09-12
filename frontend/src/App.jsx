@@ -13,6 +13,7 @@ import { ExtractedFields } from "./components/scan/ExtractedFields";
 import { JsonViewer } from "./components/scan/JsonViewer";
 import { Card, CardContent } from "./components/ui/Card";
 import { Button } from "./components/ui/Button";
+import { History } from "./pages/History";
 
 export default function App() {
   const [active, setActive] = useState("scan");
@@ -84,6 +85,26 @@ export default function App() {
   const previewStatus = isLoading ? "processing" : result ? "done" : selectedImage ? "ready" : "idle";
   const currentStep = isLoading ? 1 : result ? 4 : 0;
 
+  // Page Historique
+  if (active === "history") {
+    return (
+      <>
+        <AmbientBackground />
+        <div className="relative z-10 h-full">
+          <AppLayout
+            active={active}
+            onNavigate={setActive}
+            title="Historique"
+            subtitle="Consultez tous les documents scannés"
+          >
+            <History />
+          </AppLayout>
+        </div>
+      </>
+    );
+  }
+
+  // Page Scan (par défaut)
   return (
     <>
       <AmbientBackground />

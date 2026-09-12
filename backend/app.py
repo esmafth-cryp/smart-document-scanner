@@ -71,6 +71,10 @@ def create_app():
                 "message": "Le serveur Flask fonctionne correctement.",
             }
         )
+    @app.get("/api/uploads/<path:filename>")
+    def serve_upload(filename):
+        from flask import send_from_directory
+        return send_from_directory(UPLOAD_FOLDER, filename)
 
     @app.post("/api/scan")
     def scan_document():
