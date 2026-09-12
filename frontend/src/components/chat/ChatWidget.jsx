@@ -22,7 +22,9 @@ const SUGGESTIONS = {
 
 export function ChatWidget() {
   const { t, i18n } = useTranslation();
-  const lang = i18n.language?.startsWith("en") ? "en" : "fr";
+  const lang = (i18n.language || "fr").toLowerCase().startsWith("en")
+    ? "en"
+    : "fr";
 
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -30,18 +32,6 @@ export function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
-
-  // Message de bienvenue à l'ouverture
-  useEffect(() => {
-    if (open && messages.length === 0) {
-      setMessages([
-        {
-          role: "bot",
-          content: t("chat.welcome"),
-        },
-      ]);
-    }
-  }, [open, messages.length, t]);
 
   // Scroll auto en bas
   useEffect(() => {
@@ -93,7 +83,6 @@ export function ChatWidget() {
   }
 
   function renderContent(content) {
-    // Transforme **texte** en <strong>
     const parts = content.split(/(\*\*[^*]+\*\*)/g);
     return parts.map((part, i) => {
       if (part.startsWith("**") && part.endsWith("**")) {
@@ -106,6 +95,10 @@ export function ChatWidget() {
       return <span key={i}>{part}</span>;
     });
   }
+
+  // Le welcome est TOUJOURS affiché en premier, directement depuis t()
+  // → Il se met à jour automatiquement quand la langue change
+  const hasUserMessages = messages.length > 0;
 
   return (
     <>
@@ -139,7 +132,6 @@ export function ChatWidget() {
           )}
         </AnimatePresence>
 
-        {/* Badge "AI" */}
         {!open && (
           <span className="absolute -right-0.5 -top-0.5 flex h-5 items-center justify-center rounded-full bg-white px-1.5 text-[9px] font-bold text-primary shadow-md">
             AI
@@ -179,10 +171,18 @@ export function ChatWidget() {
             </div>
 
             {/* Messages */}
-            <div
-              ref={scrollRef}
-              className="flex-1 space-y-3 overflow-y-auto p-4"
-            >
+            <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
+              {/* Welcome TOUJOURS affiché en direct (pas dans le state) */}
+              <div className="flex gap-2 justify-start">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <Bot className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <div className="max-w-[80%] rounded-2xl border border-border bg-surface-2/50 px-3 py-2 text-xs leading-relaxed text-text-primary">
+                  <p className="whitespace-pre-wrap">{t("chat.welcome")}</p>
+                </div>
+              </div>
+
+              {/* Messages de la conversation */}
               {messages.map((m, i) => (
                 <div
                   key={i}
@@ -231,8 +231,8 @@ export function ChatWidget() {
               )}
             </div>
 
-            {/* Suggestions */}
-            {messages.length <= 1 && !loading && (
+            {/* Suggestions - affichées seulement si pas de messages utilisateur */}
+            {!hasUserMessages && !loading && (
               <div className="border-t border-border bg-surface/50 px-3 py-2">
                 <p className="mb-1.5 text-[9px] uppercase tracking-wider text-text-muted">
                   {t("chat.suggestions")}

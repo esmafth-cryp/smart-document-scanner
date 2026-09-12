@@ -23,7 +23,7 @@ import { ScanDetailModal } from "./components/history/ScanDetailModal";
 import { ChatWidget } from "./components/chat/ChatWidget";
 
 export default function App() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [active, setActive] = useState("scan");
   const [searchedScan, setSearchedScan] = useState(null);
 
@@ -284,7 +284,7 @@ export default function App() {
         />
       )}
 
-      <ChatWidget />
+      <ChatWidget key={i18n.language} />
     </ProtectedRoute>
   );
 }
