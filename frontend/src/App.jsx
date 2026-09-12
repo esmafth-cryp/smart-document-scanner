@@ -1,416 +1,172 @@
-import { useEffect, useState } from "react";
-import "./App.css";
+import { useCallback, useState } from "react";
+import { motion } from "framer-motion";
+import toast from "react-hot-toast";
+import { Download, RefreshCw } from "lucide-react";
 
-function App() {
-  const [selectedImage, setSelectedImage] = useState(null);
+import { AppLayout } from "./components/layout/AppLayout";
+import { AmbientBackground } from "./components/neon/AmbientBackground";
+import { ProcessingOverlay } from "./components/neon/ProcessingOverlay";
+import { DropZone } from "./components/scan/DropZone";
+import { DocumentPreview } from "./components/scan/DocumentPreview";
+import { WorkflowStepper } from "./components/scan/WorkflowStepper";
+import { ExtractedFields } from "./components/scan/ExtractedFields";
+import { JsonViewer } from "./components/scan/JsonViewer";
+import { Card, CardContent } from "./components/ui/Card";
+import { Button } from "./components/ui/Button";
+
+export default function App() {
+  const [active, setActive] = useState("scan");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [fileName, setFileName] = useState("");
-
+  const [selectedImage, setSelectedImage] = useState(null);
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  function handleImageChange(event) {
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      setError("Veuillez sélectionner un fichier image.");
-      return;
-    }
-
-    if (selectedImage) {
-      URL.revokeObjectURL(selectedImage);
-    }
-
-    const previewUrl = URL.createObjectURL(file);
-
-    setSelectedFile(file);
-    setFileName(file.name);
-    setSelectedImage(previewUrl);
-    setResult(null);
-    setError("");
-  }
+  const handleFile = useCallback(
+    (file) => {
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        toast.error("Format non supporté. Utilisez PNG ou JPG.");
+        return;
+      }
+      if (selectedImage) URL.revokeObjectURL(selectedImage);
+      const url = URL.createObjectURL(file);
+      setSelectedFile(file);
+      setSelectedImage(url);
+      setResult(null);
+      toast.success("Document chargé");
+    },
+    [selectedImage]
+  );
 
   async function analyzeDocument() {
     if (!selectedFile) {
-      setError("Veuillez d'abord sélectionner une image.");
+      toast.error("Veuillez d'abord sélectionner un document.");
       return;
     }
-
     setIsLoading(true);
-    setError("");
     setResult(null);
 
     const formData = new FormData();
     formData.append("image", selectedFile);
 
     try {
-      const response = await fetch(
-        "/api/scan",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
+      const response = await fetch("/api/scan", { method: "POST", body: formData });
       const data = await response.json();
-
-      if (!response.ok) {
-        const errorMessage = data.details
-          ? `${data.error} Détail : ${data.details}`
-          : data.error ||
-            "Une erreur est survenue pendant l'analyse.";
-
-        throw new Error(errorMessage);
-      }
-
+      if (!response.ok) throw new Error(data.error || "Erreur pendant l'analyse.");
       setResult(data);
+      toast.success("Analyse terminée avec succès");
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Impossible de contacter le serveur Flask."
-      );
+      toast.error(err.message || "Impossible de contacter le serveur.");
     } finally {
       setIsLoading(false);
     }
   }
 
   function exportToJson() {
-    if (!result) {
-      setError("Aucun résultat à exporter.");
-      return;
-    }
-
-    try {
-      const exportData = {
-        filename: result.filename || fileName || "document",
-        saved_filename: result.saved_filename || "",
-        document: result.document || {},
-        text: result.text || "",
-        lines: result.lines || [],
-      };
-
-      const jsonContent = JSON.stringify(exportData, null, 2);
-
-      const blob = new Blob([jsonContent], {
-        type: "application/json;charset=utf-8",
-      });
-
-      const downloadUrl = URL.createObjectURL(blob);
-      const downloadLink = document.createElement("a");
-
-      const originalName =
-        result.filename || fileName || "document";
-
-      const cleanName = originalName.replace(/\.[^/.]+$/, "");
-
-      downloadLink.href = downloadUrl;
-      downloadLink.download = `${cleanName}_analyse.json`;
-      downloadLink.style.display = "none";
-
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-
-      window.setTimeout(() => {
-        document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(downloadUrl);
-      }, 200);
-
-      setError("");
-    } catch (exportError) {
-      console.error("Erreur pendant l'export JSON :", exportError);
-      setError("L'export du fichier JSON a échoué.");
-    }
+    if (!result) return;
+    const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${(result.filename || "document").replace(/\.[^.]+$/, "")}_analyse.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Fichier JSON téléchargé");
   }
 
-  useEffect(() => {
-    return () => {
-      if (selectedImage) {
-        URL.revokeObjectURL(selectedImage);
-      }
-    };
-  }, [selectedImage]);
+  function reset() {
+    if (selectedImage) URL.revokeObjectURL(selectedImage);
+    setSelectedFile(null);
+    setSelectedImage(null);
+    setResult(null);
+  }
 
-  const documentData = result?.document || {};
+  const previewStatus = isLoading ? "processing" : result ? "done" : selectedImage ? "ready" : "idle";
+  const currentStep = isLoading ? 1 : result ? 4 : 0;
 
   return (
-    <div className="app">
-      <header className="topbar">
-        <div className="brand">
-          <div className="brand-logo">S</div>
+    <>
+      <AmbientBackground />
+      <div className="relative z-10">
+        <AppLayout
+          active={active}
+          onNavigate={setActive}
+          title="Scanner un document"
+          subtitle="Importez, analysez, validez et exportez vos documents"
+        >
+          <div className="flex h-full">
+            {/* Zone centrale */}
+            <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto p-6">
+              <Card>
+                <CardContent className="flex items-center justify-between py-4">
+                  <WorkflowStepper
+                    currentStep={currentStep}
+                    status={isLoading ? "processing" : result ? "done" : "idle"}
+                  />
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" onClick={reset} disabled={!selectedFile}>
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      Réinitialiser
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={analyzeDocument}
+                      disabled={!selectedFile}
+                      isLoading={isLoading}
+                    >
+                      {isLoading ? "Analyse..." : "Analyser"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
-          <div>
-            <h1>Smart Document Scanner</h1>
-            <p>Analyse intelligente de documents</p>
-          </div>
-        </div>
-
-        <div className="steps">
-          <span className="step active">Importer</span>
-          <span className="step">Analyser</span>
-          <span className="step">Valider</span>
-
-          <button
-            type="button"
-            className="step"
-            disabled={!result}
-            onClick={exportToJson}
-          >
-            Exporter
-          </button>
-        </div>
-      </header>
-
-      <main className="workspace">
-        <aside className="left-panel">
-          <h2>Documents</h2>
-
-          <label className="upload-button">
-            Importer une image
-
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/jpg"
-              onChange={handleImageChange}
-            />
-          </label>
-
-          <div className="document-list">
-            {selectedImage ? (
-              <div className="document-card active-document">
-                <img
-                  src={selectedImage}
-                  alt="Miniature du document"
-                />
-
-                <div>
-                  <strong>Document 1</strong>
-                  <span title={fileName}>{fileName}</span>
-                </div>
-              </div>
-            ) : (
-              <p className="empty-text">
-                Aucun document importé.
-              </p>
-            )}
-          </div>
-        </aside>
-
-        <section className="preview-panel">
-          <div className="preview-header">
-            <div>
-              <h2>Aperçu du document</h2>
-
-              <p>
-                {selectedImage
-                  ? "Le document est prêt à être analysé."
-                  : "Importez une image pour commencer l’analyse."}
-              </p>
+              <Card className="flex-1 overflow-hidden">
+                <CardContent className="h-full p-0">
+                  {selectedImage ? (
+                    <DocumentPreview
+                      image={selectedImage}
+                      status={previewStatus}
+                      onZoom={() => window.open(selectedImage, "_blank")}
+                    >
+                      <ProcessingOverlay isRunning={isLoading} isDone={!!result} />
+                    </DocumentPreview>
+                  ) : (
+                    <div className="h-full p-6">
+                      <DropZone onFile={handleFile} />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
 
-            <span className="status-badge">
-              {isLoading
-                ? "Analyse en cours"
-                : result
-                  ? "Analyse terminée"
-                  : selectedImage
-                    ? "Prêt"
-                    : "En attente"}
-            </span>
-          </div>
-
-          <div className="preview-area">
-            {selectedImage ? (
-              <div className="document-preview">
-                <img
-                  src={selectedImage}
-                  alt="Document importé"
-                />
-
-                <div className="detection-label">
-                  Document sélectionné
-                </div>
-              </div>
-            ) : (
-              <div className="upload-placeholder">
-                <div className="placeholder-icon">+</div>
-
-                <h3>Aucun document sélectionné</h3>
-
-                <p>
-                  Utilisez le bouton d’importation situé dans le
-                  panneau de gauche.
+            {/* Panneau droit */}
+            <aside className="w-[400px] shrink-0 overflow-y-auto border-l border-border bg-surface/20 p-6">
+              <div className="mb-4">
+                <h2 className="text-sm font-semibold text-text-primary">Informations extraites</h2>
+                <p className="mt-0.5 text-xs text-text-muted">
+                  {result ? "Analyse terminée" : "En attente d'analyse"}
                 </p>
               </div>
-            )}
+
+              <ExtractedFields data={result?.document || {}} loading={isLoading} />
+
+              {result && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-5"
+                >
+                  <JsonViewer data={result} />
+                  <Button className="mt-4 w-full" onClick={exportToJson}>
+                    <Download className="h-4 w-4" />
+                    Exporter en JSON
+                  </Button>
+                </motion.div>
+              )}
+            </aside>
           </div>
-        </section>
-
-        <aside className="right-panel">
-          <div className="panel-title">
-            <div>
-              <h2>Informations extraites</h2>
-              <p>
-                Les résultats de l’analyse apparaîtront ici.
-              </p>
-            </div>
-          </div>
-
-          <div className="field-group">
-            <label>Type de document</label>
-
-            <input
-              value={
-                documentData.document_type ||
-                "Non détecté"
-              }
-              readOnly
-            />
-          </div>
-
-          <div className="field-group">
-            <label>Nom du fichier</label>
-
-            <input
-              value={result?.filename || fileName || ""}
-              placeholder="En attente d’analyse"
-              readOnly
-            />
-          </div>
-
-          <div className="field-group">
-            <label>Nom de la stagiaire</label>
-
-            <input
-              value={documentData.student_name || ""}
-              placeholder="En attente d’analyse"
-              readOnly
-            />
-          </div>
-
-          <div className="field-group">
-            <label>Date du document</label>
-
-            <input
-              value={documentData.document_date || ""}
-              placeholder="En attente d’analyse"
-              readOnly
-            />
-          </div>
-
-          <div className="field-group">
-            <label>Référence</label>
-
-            <input
-              value={documentData.reference || ""}
-              placeholder="En attente d’analyse"
-              readOnly
-            />
-          </div>
-
-          <div className="field-group">
-            <label>Type de stage</label>
-
-            <input
-              value={documentData.internship_type || ""}
-              placeholder="Non détecté"
-              readOnly
-            />
-          </div>
-
-          <div className="field-group">
-            <label>Date de début</label>
-
-            <input
-              value={documentData.start_date || ""}
-              placeholder="En attente d’analyse"
-              readOnly
-            />
-          </div>
-
-          <div className="field-group">
-            <label>Durée</label>
-
-            <input
-              value={documentData.duration || ""}
-              placeholder="En attente d’analyse"
-              readOnly
-            />
-          </div>
-
-          <div className="field-group">
-            <label>Service / Division</label>
-
-            <input
-              value={documentData.department || ""}
-              placeholder="En attente d’analyse"
-              readOnly
-            />
-          </div>
-
-          <div className="field-group">
-            <label>Entreprise</label>
-
-            <input
-              value={documentData.company || ""}
-              placeholder="En attente d’analyse"
-              readOnly
-            />
-          </div>
-
-          <div className="field-group">
-            <label>Texte détecté</label>
-
-            <textarea
-              value={result?.text || ""}
-              placeholder="Le texte extrait sera affiché ici."
-              readOnly
-            />
-          </div>
-
-          <button
-            type="button"
-            className="analyze-button"
-            disabled={!selectedFile || isLoading}
-            onClick={analyzeDocument}
-          >
-            {isLoading
-              ? "Analyse en cours..."
-              : "Analyser le document"}
-          </button>
-
-          {error && (
-            <div className="message error-message">
-              <strong>Erreur</strong>
-              <p>{error}</p>
-            </div>
-          )}
-
-          {result && (
-            <div className="message success-message">
-              <strong>Analyse réussie</strong>
-              <p>Fichier reçu : {result.filename}</p>
-              <p>{result.message}</p>
-            </div>
-          )}
-
-          <button
-            type="button"
-            className="secondary-button"
-            disabled={!result}
-            onClick={exportToJson}
-          >
-            Exporter en JSON
-          </button>
-        </aside>
-      </main>
-    </div>
+        </AppLayout>
+      </div>
+    </>
   );
 }
-
-export default App;
