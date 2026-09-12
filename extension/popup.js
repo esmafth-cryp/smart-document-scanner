@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api/scan";
+const API_URL = "https://esmafth-sds.duckdns.org/api/scan";
 
 document.getElementById("capture").addEventListener("click", async () => {
   const statusEl = document.getElementById("status");
