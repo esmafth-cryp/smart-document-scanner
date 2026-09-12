@@ -80,3 +80,5 @@ Desktop.ini
 
 *.pid
 arborescence.txt
+
+backend/login.json
