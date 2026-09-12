@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { FileText } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Card, CardContent } from "../components/ui/Card";
 import { ScanFilters } from "../components/history/ScanFilters";
@@ -8,6 +9,7 @@ import { ScanDetailModal } from "../components/history/ScanDetailModal";
 import { fetchScans } from "../api/scans";
 
 export function History() {
+  const { t } = useTranslation();
   const [scans, setScans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -30,11 +32,11 @@ export function History() {
   }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => {
+    const timer = setTimeout(() => {
       setDebouncedSearch(search);
       setPage(1);
     }, 400);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [search]);
 
   const loadScans = useCallback(() => {
@@ -78,10 +80,10 @@ export function History() {
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
               <h1 className="text-sm font-semibold text-text-primary">
-                Historique des scans
+                {t("history.scansList")}
               </h1>
               <span className="rounded-full border border-border px-2 py-0.5 text-[10px] text-text-muted">
-                {total} {total === 1 ? "document" : "documents"}
+                {total} {total === 1 ? t("history.document") : t("history.documents")}
               </span>
             </div>
           </div>
@@ -113,7 +115,7 @@ export function History() {
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             className="rounded-lg border border-border px-3 py-1.5 text-xs text-text-secondary transition-colors hover:bg-white/5 disabled:opacity-40"
           >
-            Précédent
+            {t("common.previous")}
           </button>
           <span className="px-3 text-xs text-text-muted">
             Page {page} / {pages}
@@ -123,7 +125,7 @@ export function History() {
             onClick={() => setPage((p) => Math.min(pages, p + 1))}
             className="rounded-lg border border-border px-3 py-1.5 text-xs text-text-secondary transition-colors hover:bg-white/5 disabled:opacity-40"
           >
-            Suivant
+            {t("common.next")}
           </button>
         </div>
       )}

@@ -1,14 +1,17 @@
 import { Check, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/utils";
 
-const steps = [
-  { id: "preprocess", label: "Prétraitement" },
-  { id: "ocr", label: "OCR" },
-  { id: "detect", label: "Détection" },
-  { id: "extract", label: "Extraction" },
-];
-
 export function WorkflowStepper({ currentStep = 0, status = "idle" }) {
+  const { t } = useTranslation();
+
+  const steps = [
+    { id: "preprocess", label: t("scan.steps.preprocess") },
+    { id: "ocr", label: t("scan.steps.ocr") },
+    { id: "detect", label: t("scan.steps.detection") },
+    { id: "extract", label: t("scan.steps.extraction") },
+  ];
+
   return (
     <div className="flex items-center gap-3">
       {steps.map((step, i) => {

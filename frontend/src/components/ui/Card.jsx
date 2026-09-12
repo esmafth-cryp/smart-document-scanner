@@ -1,11 +1,13 @@
 import { cn } from "../../lib/utils";
 
-export function Card({ className, children, ...props }) {
+export function Card({ className, children, hover = false, ...props }) {
   return (
     <div
       className={cn(
         "rounded-xl border border-border bg-surface/50 backdrop-blur-sm",
         "transition-all duration-200",
+        hover &&
+          "hover:border-primary/30 hover:shadow-[0_0_30px_-15px_rgba(59,130,246,0.35)]",
         className
       )}
       {...props}

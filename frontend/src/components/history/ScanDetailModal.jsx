@@ -9,6 +9,7 @@ import {
   Edit3,
   Save,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 
 import { Button } from "../ui/Button";
@@ -16,19 +17,20 @@ import { Badge } from "../ui/Badge";
 import { Input } from "../ui/Input";
 import { fetchScanDetail, validateScan, getExportUrl } from "../../api/scans";
 
-const FIELD_LABELS = {
-  document_type: "Type de document",
-  student_name: "Nom du stagiaire",
-  document_date: "Date du document",
-  reference: "Référence",
-  internship_type: "Type de stage",
-  start_date: "Date de début",
-  duration: "Durée",
-  department: "Service / Division",
-  company: "Entreprise",
-};
+const FIELD_KEYS = [
+  "document_type",
+  "student_name",
+  "document_date",
+  "reference",
+  "internship_type",
+  "start_date",
+  "duration",
+  "department",
+  "company",
+];
 
 export function ScanDetailModal({ scan, onClose }) {
+  const { t } = useTranslation();
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(false);
   const [edits, setEdits] = useState({});
@@ -40,9 +42,9 @@ export function ScanDetailModal({ scan, onClose }) {
     setEdits({});
     fetchScanDetail(scan.id)
       .then((res) => setDetail(res.scan))
-      .catch(() => toast.error("Impossible de charger le détail"))
+      .catch(() => toast.error(t("detail.loadingError")))
       .finally(() => setLoading(false));
-  }, [scan]);
+  }, [scan, t]);
 
   useEffect(() => {
     const onEsc = (e) => e.key === "Escape" && onClose();
@@ -68,22 +70,22 @@ export function ScanDetailModal({ scan, onClose }) {
     setSaving(true);
     try {
       await validateScan(detail.id, edits);
-      toast.success("Scan validé et corrections enregistrées");
+      toast.success(t("detail.validated"));
       setEdits({});
       onClose();
     } catch (err) {
-      toast.error(err.message || "Erreur de validation");
+      toast.error(err.message || t("detail.validationError"));
     } finally {
       setSaving(false);
     }
   }
 
-    async function exportFile(format) {
+  async function exportFile(format) {
     if (!detail) return;
     try {
       const url = getExportUrl(detail.id, format);
       const res = await fetch(url);
-      if (!res.ok) throw new Error("Erreur d'export");
+      if (!res.ok) throw new Error(t("common.error"));
 
       const blob = await res.blob();
       const downloadUrl = URL.createObjectURL(blob);
@@ -95,9 +97,9 @@ export function ScanDetailModal({ scan, onClose }) {
       document.body.removeChild(a);
       URL.revokeObjectURL(downloadUrl);
 
-      toast.success(`Export ${format.toUpperCase()} téléchargé`);
+      toast.success(t("detail.exported", { format: format.toUpperCase() }));
     } catch (err) {
-      toast.error(err.message || "Erreur d'export");
+      toast.error(err.message || t("common.error"));
     }
   }
 
@@ -117,13 +119,15 @@ export function ScanDetailModal({ scan, onClose }) {
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative flex max-h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-border bg-[#0d1224] shadow-2xl"
+            className="relative flex max-h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
           >
-            <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between border-b border-border bg-[#0d1224]/95 px-6 py-4 backdrop-blur">
+            <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between border-b border-border bg-surface/95 px-6 py-4 backdrop-blur">
               <div className="flex items-center gap-3">
                 <FileText className="h-4 w-4 text-primary" />
                 <div>
-                  <h2 className="text-sm font-semibold text-text-primary">Détail du scan</h2>
+                  <h2 className="text-sm font-semibold text-text-primary">
+                    {t("detail.title")}
+                  </h2>
                   <p className="text-[11px] text-text-muted">{scan.original_filename}</p>
                 </div>
               </div>
@@ -131,9 +135,9 @@ export function ScanDetailModal({ scan, onClose }) {
                 <div className="group relative">
                   <Button variant="secondary" size="sm">
                     <Download className="h-3.5 w-3.5" />
-                    Exporter
+                    {t("detail.export")}
                   </Button>
-                  <div className="invisible absolute right-0 top-full z-20 mt-1 w-36 overflow-hidden rounded-lg border border-border bg-[#131826] opacity-0 shadow-xl transition-all group-hover:visible group-hover:opacity-100">
+                  <div className="invisible absolute right-0 top-full z-20 mt-1 w-36 overflow-hidden rounded-lg border border-border bg-surface-2 opacity-0 shadow-xl transition-all group-hover:visible group-hover:opacity-100">
                     {["json", "csv", "xlsx"].map((fmt) => (
                       <button
                         key={fmt}
@@ -190,7 +194,9 @@ export function ScanDetailModal({ scan, onClose }) {
                           detail.status === "validated" ? "success" : "warning"
                         }
                       >
-                        {detail.status === "validated" ? "Validé" : "En attente"}
+                        {detail.status === "validated"
+                          ? t("history.validated")
+                          : t("history.pending")}
                       </Badge>
                       {detail.ocr_confidence && (
                         <Badge variant="cyan">
@@ -203,7 +209,7 @@ export function ScanDetailModal({ scan, onClose }) {
                       <div className="mb-3 flex items-center gap-2">
                         <Edit3 className="h-3.5 w-3.5 text-primary" />
                         <h3 className="text-xs font-medium uppercase tracking-wider text-text-muted">
-                          Informations extraites (éditables)
+                          {t("detail.extractedInfo")}
                         </h3>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
@@ -221,11 +227,13 @@ export function ScanDetailModal({ scan, onClose }) {
                             >
                               <div className="mb-1.5 flex items-center justify-between">
                                 <p className="text-[10px] uppercase tracking-wider text-text-muted">
-                                  {FIELD_LABELS[key] || key}
+                                  {FIELD_KEYS.includes(key)
+                                    ? t(`fields.${key}`)
+                                    : key}
                                 </p>
                                 {isEditing && (
                                   <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-medium text-primary">
-                                    modifié
+                                    {t("detail.modified")}
                                   </span>
                                 )}
                               </div>
@@ -242,7 +250,7 @@ export function ScanDetailModal({ scan, onClose }) {
 
                     <div>
                       <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
-                        Texte OCR brut
+                        {t("detail.rawText")}
                       </h3>
                       <pre className="max-h-64 overflow-auto rounded-lg border border-border bg-surface/40 p-3 font-mono text-[11px] leading-relaxed text-text-secondary">
                         {detail.raw_text}
@@ -250,16 +258,16 @@ export function ScanDetailModal({ scan, onClose }) {
                     </div>
                   </>
                 ) : (
-                  <p className="text-sm text-text-muted">Chargement...</p>
+                  <p className="text-sm text-text-muted">{t("common.loading")}</p>
                 )}
               </div>
             </div>
 
-            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between border-t border-border bg-[#0d1224]/95 px-6 py-3 backdrop-blur">
+            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between border-t border-border bg-surface/95 px-6 py-3 backdrop-blur">
               <p className="text-[11px] text-text-muted">
                 {hasChanges
-                  ? `${Object.keys(edits).length} champ(s) modifié(s)`
-                  : "Aucune modification"}
+                  ? t("detail.changesCount", { count: Object.keys(edits).length })
+                  : t("detail.noChanges")}
               </p>
               <Button
                 onClick={handleValidate}
@@ -267,7 +275,7 @@ export function ScanDetailModal({ scan, onClose }) {
                 isLoading={saving}
               >
                 {!saving && <Save className="h-3.5 w-3.5" />}
-                Valider et enregistrer
+                {t("detail.validateAndSave")}
               </Button>
             </div>
           </motion.div>

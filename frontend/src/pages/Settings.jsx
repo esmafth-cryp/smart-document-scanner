@@ -11,6 +11,7 @@ import {
   Database,
   Code2,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/Card";
@@ -22,6 +23,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import { changePassword } from "../api/auth";
 
 export function Settings() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
   const [pwd, setPwd] = useState({ old: "", new: "", confirm: "" });
@@ -31,24 +33,24 @@ export function Settings() {
   async function submitPassword(e) {
     e.preventDefault();
     if (!pwd.old || !pwd.new || !pwd.confirm) {
-      toast.error("Tous les champs sont requis");
+      toast.error(t("settings.allFieldsRequired"));
       return;
     }
     if (pwd.new !== pwd.confirm) {
-      toast.error("Les nouveaux mots de passe ne correspondent pas");
+      toast.error(t("settings.passwordMismatch"));
       return;
     }
     if (pwd.new.length < 6) {
-      toast.error("Le mot de passe doit contenir au moins 6 caractères");
+      toast.error(t("settings.passwordTooShort"));
       return;
     }
     setLoading(true);
     try {
       await changePassword(pwd.old, pwd.new);
-      toast.success("Mot de passe modifié avec succès");
+      toast.success(t("settings.passwordUpdated"));
       setPwd({ old: "", new: "", confirm: "" });
     } catch (err) {
-      toast.error(err.message || "Erreur");
+      toast.error(err.message || t("common.error"));
     } finally {
       setLoading(false);
     }
@@ -56,6 +58,7 @@ export function Settings() {
 
   return (
     <div className="flex h-full flex-col gap-4 overflow-y-auto p-6">
+      {/* Profil */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
         <Card>
           <CardHeader>
@@ -64,8 +67,8 @@ export function Settings() {
                 <User className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <CardTitle>Profil</CardTitle>
-                <CardDescription>Vos informations personnelles</CardDescription>
+                <CardTitle>{t("settings.profile")}</CardTitle>
+                <CardDescription>{t("settings.profileSub")}</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -79,8 +82,8 @@ export function Settings() {
                   {user?.full_name}
                 </p>
                 <p className="text-xs text-text-muted">{user?.email}</p>
-                <Badge variant="primary" className="mt-1.5 capitalize">
-                  {user?.role}
+                <Badge variant="primary" className="mt-1.5">
+                  {user?.role ? t(`roles.${user.role}`) : "—"}
                 </Badge>
               </div>
             </div>
@@ -88,25 +91,28 @@ export function Settings() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                  Nom complet
+                  {t("settings.fullName")}
                 </label>
                 <Input value={user?.full_name || ""} readOnly />
               </div>
               <div>
                 <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                  Email
+                  {t("settings.email")}
                 </label>
                 <Input value={user?.email || ""} readOnly />
               </div>
               <div>
                 <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                  Rôle
+                  {t("settings.role")}
                 </label>
-                <Input value={user?.role || ""} readOnly className="capitalize" />
+                <Input
+                  value={user?.role ? t(`roles.${user.role}`) : ""}
+                  readOnly
+                />
               </div>
               <div>
                 <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                  Département
+                  {t("settings.department")}
                 </label>
                 <Input value={user?.department || "—"} readOnly />
               </div>
@@ -115,6 +121,7 @@ export function Settings() {
         </Card>
       </motion.div>
 
+      {/* Sécurité */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
         <Card>
           <CardHeader>
@@ -123,8 +130,8 @@ export function Settings() {
                 <Lock className="h-4 w-4 text-warning" />
               </div>
               <div>
-                <CardTitle>Sécurité</CardTitle>
-                <CardDescription>Modifier votre mot de passe</CardDescription>
+                <CardTitle>{t("settings.security")}</CardTitle>
+                <CardDescription>{t("settings.securitySub")}</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -132,7 +139,7 @@ export function Settings() {
             <form onSubmit={submitPassword} className="space-y-4">
               <div>
                 <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                  Mot de passe actuel
+                  {t("settings.currentPassword")}
                 </label>
                 <Input
                   type="password"
@@ -144,7 +151,7 @@ export function Settings() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                    Nouveau mot de passe
+                    {t("settings.newPassword")}
                   </label>
                   <Input
                     type="password"
@@ -155,7 +162,7 @@ export function Settings() {
                 </div>
                 <div>
                   <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                    Confirmation
+                    {t("settings.confirmPassword")}
                   </label>
                   <Input
                     type="password"
@@ -167,13 +174,14 @@ export function Settings() {
               </div>
               <Button type="submit" isLoading={loading}>
                 {!loading && <Save className="h-3.5 w-3.5" />}
-                Mettre à jour
+                {t("settings.updatePassword")}
               </Button>
             </form>
           </CardContent>
         </Card>
       </motion.div>
 
+      {/* Préférences */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Card>
           <CardHeader>
@@ -182,17 +190,17 @@ export function Settings() {
                 <Bell className="h-4 w-4 text-cyan" />
               </div>
               <div>
-                <CardTitle>Préférences</CardTitle>
-                <CardDescription>Personnalisez votre expérience</CardDescription>
+                <CardTitle>{t("settings.preferences")}</CardTitle>
+                <CardDescription>{t("settings.preferencesSub")}</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between rounded-lg border border-border bg-surface/40 p-3">
               <div>
-                <p className="text-sm text-text-primary">Notifications</p>
+                <p className="text-sm text-text-primary">{t("settings.notifications")}</p>
                 <p className="text-[11px] text-text-muted">
-                  Recevoir une alerte à chaque scan terminé
+                  {t("settings.notificationsSub")}
                 </p>
               </div>
               <button
@@ -212,23 +220,23 @@ export function Settings() {
 
             <div className="flex items-center justify-between rounded-lg border border-border bg-surface/40 p-3">
               <div>
-                <p className="text-sm text-text-primary">Thème</p>
+                <p className="text-sm text-text-primary">{t("settings.theme")}</p>
                 <p className="text-[11px] text-text-muted">
-                  Apparence de l'interface
+                  {t("settings.themeSub")}
                 </p>
               </div>
               <div className="flex rounded-lg border border-border bg-surface-2/40 p-1">
-                {["dark", "light"].map((t) => (
+                {["dark", "light"].map((th) => (
                   <button
-                    key={t}
-                    onClick={() => setTheme(t)}
-                    className={`rounded-md px-3 py-1 text-[11px] font-medium capitalize transition-colors ${
-                      theme === t
+                    key={th}
+                    onClick={() => setTheme(th)}
+                    className={`rounded-md px-3 py-1 text-[11px] font-medium transition-colors ${
+                      theme === th
                         ? "bg-primary/20 text-primary"
                         : "text-text-muted hover:text-text-primary"
                     }`}
                   >
-                    {t === "dark" ? "Sombre" : "Clair"}
+                    {th === "dark" ? t("settings.themeDark") : t("settings.themeLight")}
                   </button>
                 ))}
               </div>
@@ -237,6 +245,7 @@ export function Settings() {
         </Card>
       </motion.div>
 
+      {/* À propos */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
         <Card>
           <CardHeader>
@@ -245,8 +254,8 @@ export function Settings() {
                 <Info className="h-4 w-4 text-text-secondary" />
               </div>
               <div>
-                <CardTitle>À propos</CardTitle>
-                <CardDescription>Informations système</CardDescription>
+                <CardTitle>{t("settings.about")}</CardTitle>
+                <CardDescription>{t("settings.aboutSub")}</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -255,21 +264,21 @@ export function Settings() {
               <div className="rounded-lg border border-border bg-surface/40 p-3">
                 <Cpu className="mb-2 h-4 w-4 text-primary" />
                 <p className="text-[10px] uppercase tracking-wider text-text-muted">
-                  Frontend
+                  {t("settings.frontend")}
                 </p>
                 <p className="text-xs text-text-primary">React 19 + Vite</p>
               </div>
               <div className="rounded-lg border border-border bg-surface/40 p-3">
                 <Code2 className="mb-2 h-4 w-4 text-violet-400" />
                 <p className="text-[10px] uppercase tracking-wider text-text-muted">
-                  Backend
+                  {t("settings.backend")}
                 </p>
                 <p className="text-xs text-text-primary">Flask + SQLAlchemy</p>
               </div>
               <div className="rounded-lg border border-border bg-surface/40 p-3">
                 <Database className="mb-2 h-4 w-4 text-cyan" />
                 <p className="text-[10px] uppercase tracking-wider text-text-muted">
-                  Base de données
+                  {t("settings.database")}
                 </p>
                 <p className="text-xs text-text-primary">PostgreSQL 15</p>
               </div>
@@ -281,7 +290,7 @@ export function Settings() {
                   Smart Document Scanner
                 </p>
                 <p className="text-[10px] text-text-muted">
-                  Version 1.0.0 — Marsa Maroc © 2026
+                  {t("settings.version")}
                 </p>
               </div>
             </div>

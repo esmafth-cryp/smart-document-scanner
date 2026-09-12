@@ -1,13 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import { Sun, Moon, User, LogOut, ChevronDown } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../contexts/ThemeContext";
 import { NotificationsDropdown } from "./NotificationsDropdown";
 import { GlobalSearch } from "./GlobalSearch";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function Header({ title, subtitle, onSelectScan, onSeeAll }) {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -31,11 +34,15 @@ export function Header({ title, subtitle, onSelectScan, onSeeAll }) {
       <div className="flex items-center gap-3">
         <GlobalSearch onSelectScan={onSelectScan} onSeeAll={onSeeAll} />
 
+        <LanguageSwitcher />
+
         <NotificationsDropdown />
 
         <button
           onClick={toggleTheme}
-          title={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
+          title={
+            theme === "dark" ? t("theme.lightMode") : t("theme.darkMode")
+          }
           className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary"
         >
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -57,14 +64,14 @@ export function Header({ title, subtitle, onSelectScan, onSeeAll }) {
           </button>
 
           {open && (
-            <div className="absolute right-0 top-full z-[100] mt-2 w-64 overflow-hidden rounded-xl border border-border-strong bg-[#0d1224] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.9)]">
+            <div className="absolute right-0 top-full z-[100] mt-2 w-64 overflow-hidden rounded-xl border border-border-strong bg-surface shadow-[0_20px_60px_-10px_rgba(0,0,0,0.4)]">
               <div className="border-b border-border p-3">
                 <p className="truncate text-sm font-medium text-text-primary">
                   {user?.full_name || "Utilisateur"}
                 </p>
                 <p className="truncate text-[11px] text-text-muted">{user?.email || "—"}</p>
-                <span className="mt-1.5 inline-block rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-medium capitalize text-primary">
-                  {user?.role || "—"}
+                <span className="mt-1.5 inline-block rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                  {user?.role ? t(`roles.${user.role}`) : "—"}
                 </span>
               </div>
 
@@ -76,7 +83,7 @@ export function Header({ title, subtitle, onSelectScan, onSeeAll }) {
                 className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-text-secondary transition-colors hover:bg-danger/10 hover:text-danger"
               >
                 <LogOut className="h-3.5 w-3.5" />
-                Se déconnecter
+                {t("auth.signOut")}
               </button>
             </div>
           )}

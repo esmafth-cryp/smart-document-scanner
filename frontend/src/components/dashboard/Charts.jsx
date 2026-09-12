@@ -18,8 +18,8 @@ export function ScansAreaChart({ data = [] }) {
       <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="scansGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.6} />
-            <stop offset="100%" stopColor="#8B5CF6" stopOpacity={0} />
+            <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.6} />
+            <stop offset="100%" stopColor="#06B6D4" stopOpacity={0} />
           </linearGradient>
         </defs>
         <XAxis
@@ -43,12 +43,12 @@ export function ScansAreaChart({ data = [] }) {
             fontSize: 12,
             color: "#F8FAFC",
           }}
-          cursor={{ stroke: "rgba(139,92,246,0.3)" }}
+          cursor={{ stroke: "rgba(59,130,246,0.3)" }}
         />
         <Area
           type="monotone"
           dataKey="count"
-          stroke="#8B5CF6"
+          stroke="#3B82F6"
           strokeWidth={2}
           fill="url(#scansGradient)"
         />
@@ -58,7 +58,7 @@ export function ScansAreaChart({ data = [] }) {
 }
 
 // === Donut Chart : répartition par type ===
-const DONUT_COLORS = ["#8B5CF6", "#06B6D4", "#EC4899", "#F59E0B", "#10B981"];
+const DONUT_COLORS = ["#3B82F6", "#06B6D4", "#10B981", "#F59E0B", "#EC4899"];
 
 export function TypesDonutChart({ data = [] }) {
   const chartData = data.map((d) => ({

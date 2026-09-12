@@ -1,4 +1,5 @@
 import { Search, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Input } from "../ui/Input";
 
 export function ScanFilters({
@@ -10,6 +11,8 @@ export function ScanFilters({
   onDocumentTypeChange,
   onReset,
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       {/* Search */}
@@ -18,7 +21,7 @@ export function ScanFilters({
         <Input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Rechercher un fichier, un texte..."
+          placeholder={t("history.search")}
           className="pl-9"
         />
         {search && (
@@ -37,11 +40,11 @@ export function ScanFilters({
         onChange={(e) => onStatusChange(e.target.value)}
         className="h-10 rounded-lg border border-border bg-surface-2/50 px-3 text-sm text-text-primary focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
       >
-        <option value="">Tous les statuts</option>
-        <option value="pending">En attente</option>
-        <option value="validated">Validé</option>
-        <option value="corrected">Corrigé</option>
-        <option value="rejected">Rejeté</option>
+        <option value="">{t("history.allStatuses")}</option>
+        <option value="pending">{t("history.pending")}</option>
+        <option value="validated">{t("history.validated")}</option>
+        <option value="corrected">{t("history.corrected")}</option>
+        <option value="rejected">{t("history.rejected")}</option>
       </select>
 
       {/* Document type */}
@@ -50,11 +53,11 @@ export function ScanFilters({
         onChange={(e) => onDocumentTypeChange(e.target.value)}
         className="h-10 rounded-lg border border-border bg-surface-2/50 px-3 text-sm text-text-primary focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
       >
-        <option value="">Tous les types</option>
-        <option value="decision_stage">Décision de stage</option>
-        <option value="invoice">Facture</option>
-        <option value="delivery_note">Bon de livraison</option>
-        <option value="unknown">Inconnu</option>
+        <option value="">{t("history.allTypes")}</option>
+        <option value="decision_stage">{t("documentTypes.decision_stage")}</option>
+        <option value="invoice">{t("documentTypes.invoice")}</option>
+        <option value="delivery_note">{t("documentTypes.delivery_note")}</option>
+        <option value="unknown">{t("documentTypes.unknown")}</option>
       </select>
 
       {/* Reset */}
@@ -63,7 +66,7 @@ export function ScanFilters({
           onClick={onReset}
           className="h-10 rounded-lg border border-border px-3 text-xs text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary"
         >
-          Réinitialiser
+          {t("common.reset")}
         </button>
       )}
     </div>

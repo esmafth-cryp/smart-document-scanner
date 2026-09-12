@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FileText, Calendar, CheckCircle2, Target, Clock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/Card";
@@ -15,9 +16,9 @@ function formatPct(v) {
   return `${Math.round((v || 0) * 100)}%`;
 }
 
-function formatDate(iso) {
+function formatDate(iso, lang) {
   if (!iso) return "-";
-  return new Date(iso).toLocaleString("fr-FR", {
+  return new Date(iso).toLocaleString(lang === "en" ? "en-GB" : "fr-FR", {
     day: "2-digit",
     month: "2-digit",
     hour: "2-digit",
@@ -26,6 +27,7 @@ function formatDate(iso) {
 }
 
 export function Dashboard({ onNavigate }) {
+  const { t, i18n } = useTranslation();
   const [overview, setOverview] = useState(null);
   const [timeline, setTimeline] = useState([]);
   const [types, setTypes] = useState([]);
@@ -46,9 +48,9 @@ export function Dashboard({ onNavigate }) {
         setTypes(dt.types || []);
         setRecentScans(scans.items || []);
       })
-      .catch(() => toast.error("Erreur de chargement du dashboard"))
+      .catch(() => toast.error(t("common.error")))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   return (
     <div className="flex h-full flex-col gap-5 overflow-y-auto p-6">
@@ -65,35 +67,35 @@ export function Dashboard({ onNavigate }) {
           <>
             <KpiCard
               icon={FileText}
-              label="Total scans"
+              label={t("dashboard.totalScans")}
               value={overview?.total_scans ?? 0}
-              subtitle="Documents traités"
-              color="violet"
+              subtitle={t("dashboard.totalScansSub")}
+              color="blue"
               delay={0}
             />
             <KpiCard
               icon={Calendar}
-              label="Aujourd'hui"
+              label={t("dashboard.today")}
               value={overview?.scans_today ?? 0}
-              subtitle="Nouveaux scans"
+              subtitle={t("dashboard.todaySub")}
               color="cyan"
-              delay={0.05}
+              delay={0}
             />
             <KpiCard
               icon={CheckCircle2}
-              label="Taux de réussite"
+              label={t("dashboard.successRate")}
               value={formatPct(overview?.success_rate)}
-              subtitle="Validés / Total"
+              subtitle={t("dashboard.successRateSub")}
               color="green"
-              delay={0.1}
+              delay={0}
             />
             <KpiCard
               icon={Target}
-              label="Confiance OCR"
+              label={t("dashboard.ocrConfidence")}
               value={formatPct(overview?.avg_ocr_confidence)}
-              subtitle="Moyenne globale"
+              subtitle={t("dashboard.ocrConfidenceSub")}
               color="pink"
-              delay={0.15}
+              delay={0}
             />
           </>
         )}
@@ -103,8 +105,8 @@ export function Dashboard({ onNavigate }) {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Activité des 30 derniers jours</CardTitle>
-            <CardDescription>Nombre de scans par jour</CardDescription>
+            <CardTitle>{t("dashboard.activity")}</CardTitle>
+            <CardDescription>{t("dashboard.activitySub")}</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -117,8 +119,8 @@ export function Dashboard({ onNavigate }) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Répartition par type</CardTitle>
-            <CardDescription>Documents détectés</CardDescription>
+            <CardTitle>{t("dashboard.repartition")}</CardTitle>
+            <CardDescription>{t("dashboard.repartitionSub")}</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -134,11 +136,11 @@ export function Dashboard({ onNavigate }) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Scans récents</CardTitle>
-            <CardDescription>Les 5 derniers documents</CardDescription>
+            <CardTitle>{t("dashboard.recentScans")}</CardTitle>
+            <CardDescription>{t("dashboard.recentScansSub")}</CardDescription>
           </div>
           <Button variant="ghost" size="sm" onClick={() => onNavigate?.("history")}>
-            Voir tout
+            {t("dashboard.seeAll")}
           </Button>
         </CardHeader>
         <CardContent>
@@ -146,7 +148,7 @@ export function Dashboard({ onNavigate }) {
             <Skeleton className="h-40" />
           ) : recentScans.length === 0 ? (
             <p className="py-8 text-center text-sm text-text-muted">
-              Aucun scan pour l'instant
+              {t("history.noResults")}
             </p>
           ) : (
             <div className="space-y-2">
@@ -164,14 +166,14 @@ export function Dashboard({ onNavigate }) {
                         {scan.original_filename}
                       </p>
                       <p className="text-[10px] text-text-muted">
-                        {formatDate(scan.created_at)}
+                        {formatDate(scan.created_at, i18n.language)}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge variant="warning">
                       <Clock className="h-3 w-3" />
-                      {scan.status}
+                      {t(`history.${scan.status}`, scan.status)}
                     </Badge>
                     <span className="font-mono text-[10px] text-text-muted">
                       {formatPct(scan.ocr_confidence)}

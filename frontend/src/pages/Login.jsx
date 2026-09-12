@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowRight, FileScan } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 
 import { useAuth } from "../contexts/AuthContext";
@@ -8,9 +9,11 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { AmbientBackground } from "../components/neon/AmbientBackground";
 import { MarsaLogo } from "../components/brand/MarsaLogo";
+import { LanguageSwitcher } from "../components/layout/LanguageSwitcher";
 
 export function Login() {
   const { signIn, signUp } = useAuth();
+  const { t } = useTranslation();
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,17 +26,17 @@ export function Login() {
     try {
       if (mode === "login") {
         await signIn(email, password);
-        toast.success("Connecté");
+        toast.success(t("auth.welcome"));
       } else {
         if (!fullName.trim()) {
-          toast.error("Nom complet requis");
+          toast.error(t("auth.nameRequired"));
           return;
         }
         await signUp({ email, password, full_name: fullName, role: "agent" });
-        toast.success("Compte créé");
+        toast.success(t("auth.accountCreated"));
       }
     } catch (err) {
-      toast.error(err.message || "Erreur d'authentification");
+      toast.error(err.message || t("auth.authError"));
     } finally {
       setLoading(false);
     }
@@ -42,6 +45,12 @@ export function Login() {
   return (
     <>
       <AmbientBackground />
+
+      {/* Language switcher en haut à droite */}
+      <div className="absolute right-6 top-6 z-20">
+        <LanguageSwitcher />
+      </div>
+
       <div className="relative z-10 flex h-screen w-full items-center justify-center p-6">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -73,7 +82,7 @@ export function Login() {
                     : "text-text-muted hover:text-text-primary"
                 }`}
               >
-                Connexion
+                {t("auth.login")}
               </button>
               <button
                 type="button"
@@ -84,7 +93,7 @@ export function Login() {
                     : "text-text-muted hover:text-text-primary"
                 }`}
               >
-                Inscription
+                {t("auth.register")}
               </button>
             </div>
 
@@ -92,19 +101,19 @@ export function Login() {
               {mode === "register" && (
                 <div>
                   <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                    Nom complet
+                    {t("auth.fullName")}
                   </label>
                   <Input
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Prénom Nom"
+                    placeholder={t("auth.namePlaceholder")}
                   />
                 </div>
               )}
 
               <div>
                 <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                  Email
+                  {t("auth.email")}
                 </label>
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
@@ -112,7 +121,7 @@ export function Login() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="vous@marsamaroc.ma"
+                    placeholder={t("auth.emailPlaceholder")}
                     className="pl-9"
                   />
                 </div>
@@ -120,7 +129,7 @@ export function Login() {
 
               <div>
                 <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                  Mot de passe
+                  {t("auth.password")}
                 </label>
                 <div className="relative">
                   <Lock className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
@@ -128,7 +137,7 @@ export function Login() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder={t("auth.passwordPlaceholder")}
                     className="pl-9"
                   />
                 </div>
@@ -141,7 +150,7 @@ export function Login() {
                 isLoading={loading}
               >
                 {!loading && <ArrowRight className="h-4 w-4" />}
-                {mode === "login" ? "Se connecter" : "Créer un compte"}
+                {mode === "login" ? t("auth.signIn") : t("auth.signUp")}
               </Button>
             </form>
           </div>

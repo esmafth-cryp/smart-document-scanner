@@ -8,6 +8,7 @@ import {
   UserCog,
   UserX,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { fetchNotifications } from "../../api/auth";
 
@@ -27,7 +28,16 @@ const ACTION_COLORS = {
   "user.delete": "text-danger",
 };
 
+const ACTION_LABELS = {
+  "scan.create": "notifications.scanCreate",
+  "scan.validate": "notifications.scanValidate",
+  "user.create": "notifications.userCreate",
+  "user.update": "notifications.userUpdate",
+  "user.delete": "notifications.userDelete",
+};
+
 export function NotificationsDropdown() {
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [readIds, setReadIds] = useState(() => {
@@ -74,12 +84,17 @@ export function NotificationsDropdown() {
   function formatDate(iso) {
     if (!iso) return "";
     const d = new Date(iso);
-    return d.toLocaleString("fr-FR", {
+    return d.toLocaleString(i18n.language === "en" ? "en-GB" : "fr-FR", {
       day: "2-digit",
       month: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
     });
+  }
+
+  function getLabel(item) {
+    const key = ACTION_LABELS[item.action];
+    return key ? t(key) : item.label;
   }
 
   return (
@@ -103,13 +118,13 @@ export function NotificationsDropdown() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full z-[100] mt-2 w-80 overflow-hidden rounded-xl border border-border-strong bg-[#0d1224] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.9)]"
+            className="absolute right-0 top-full z-[100] mt-2 w-80 overflow-hidden rounded-xl border border-border-strong bg-surface shadow-[0_20px_60px_-10px_rgba(0,0,0,0.4)]"
           >
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div className="flex items-center gap-2">
                 <Bell className="h-3.5 w-3.5 text-primary" />
                 <span className="text-sm font-semibold text-text-primary">
-                  Notifications
+                  {t("notifications.title")}
                 </span>
                 {unreadCount > 0 && (
                   <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] text-primary">
@@ -122,7 +137,7 @@ export function NotificationsDropdown() {
                   onClick={markAllRead}
                   className="text-[10px] text-text-muted transition-colors hover:text-primary"
                 >
-                  Tout marquer lu
+                  {t("notifications.markAllRead")}
                 </button>
               )}
             </div>
@@ -130,11 +145,11 @@ export function NotificationsDropdown() {
             <div className="max-h-96 overflow-y-auto">
               {loading ? (
                 <div className="p-6 text-center text-xs text-text-muted">
-                  Chargement...
+                  {t("common.loading")}
                 </div>
               ) : items.length === 0 ? (
                 <div className="p-6 text-center text-xs text-text-muted">
-                  Aucune notification
+                  {t("notifications.noNotifications")}
                 </div>
               ) : (
                 items.map((item) => {
@@ -156,7 +171,7 @@ export function NotificationsDropdown() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-xs font-medium text-text-primary">
-                          {item.label}
+                          {getLabel(item)}
                         </p>
                         <p className="mt-0.5 text-[10px] text-text-muted">
                           {formatDate(item.created_at)}
@@ -174,7 +189,7 @@ export function NotificationsDropdown() {
             {items.length > 0 && (
               <div className="border-t border-border px-4 py-2 text-center">
                 <span className="text-[10px] text-text-muted">
-                  {items.length} notification(s) récente(s)
+                  {t("notifications.recentCount", { count: items.length })}
                 </span>
               </div>
             )}

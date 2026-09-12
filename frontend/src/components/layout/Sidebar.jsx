@@ -9,20 +9,22 @@ import {
   User as UserIcon,
   FileScan,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../contexts/AuthContext";
 import { MarsaLogo } from "../brand/MarsaLogo";
 
-const navItems = [
-  { id: "dashboard", label: "Tableau de bord", icon: LayoutDashboard },
-  { id: "scan", label: "Scanner", icon: FileScan },
-  { id: "history", label: "Historique", icon: History },
-  { id: "admin", label: "Administration", icon: Shield, roles: ["admin"] },
-  { id: "settings", label: "Paramètres", icon: Settings },
-];
-
 export function Sidebar({ active = "scan", onNavigate, collapsed = false, onToggle }) {
   const { user, signOut, role } = useAuth();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { id: "dashboard", label: t("nav.dashboard"), icon: LayoutDashboard },
+    { id: "scan", label: t("nav.scan"), icon: FileScan },
+    { id: "history", label: t("nav.history"), icon: History },
+    { id: "admin", label: t("nav.admin"), icon: Shield, roles: ["admin"] },
+    { id: "settings", label: t("nav.settings"), icon: Settings },
+  ];
 
   const visibleItems = navItems.filter(
     (item) => !item.roles || item.roles.includes(role)
@@ -93,8 +95,8 @@ export function Sidebar({ active = "scan", onNavigate, collapsed = false, onTogg
               <p className="truncate text-xs font-medium text-text-primary">
                 {user?.full_name || "Utilisateur"}
               </p>
-              <p className="truncate text-[10px] text-text-muted capitalize">
-                {user?.role || "—"}
+              <p className="truncate text-[10px] text-text-muted">
+                {user?.role ? t(`roles.${user.role}`) : "—"}
               </p>
             </div>
           </div>
@@ -102,14 +104,14 @@ export function Sidebar({ active = "scan", onNavigate, collapsed = false, onTogg
 
         <button
           onClick={signOut}
-          title="Déconnexion"
+          title={t("nav.logout")}
           className={cn(
             "flex h-9 w-full items-center gap-3 rounded-lg px-3 text-xs text-text-muted transition-colors hover:bg-danger/10 hover:text-danger",
             collapsed && "justify-center"
           )}
         >
           <LogOut className="h-4 w-4 shrink-0" />
-          {!collapsed && <span>Déconnexion</span>}
+          {!collapsed && <span>{t("nav.logout")}</span>}
         </button>
       </div>
 

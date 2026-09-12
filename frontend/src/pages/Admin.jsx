@@ -9,6 +9,7 @@ import {
   XCircle,
   Search,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/Card";
@@ -24,6 +25,7 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 
 export function Admin() {
+  const { t } = useTranslation();
   const { user: me } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +36,7 @@ export function Admin() {
     setLoading(true);
     fetchUsers()
       .then((list) => setUsers(list || []))
-      .catch(() => toast.error("Erreur de chargement"))
+      .catch(() => toast.error(t("admin.loadError")))
       .finally(() => setLoading(false));
   };
 
@@ -43,31 +45,31 @@ export function Admin() {
   async function toggleActive(u) {
     try {
       await adminUpdateUser(u.id, { is_active: !u.is_active });
-      toast.success("Statut mis à jour");
+      toast.success(t("admin.statusUpdated"));
       load();
     } catch (err) {
-      toast.error(err.message || "Erreur");
+      toast.error(err.message || t("common.error"));
     }
   }
 
   async function changeRole(u, role) {
     try {
       await adminUpdateUser(u.id, { role });
-      toast.success("Rôle mis à jour");
+      toast.success(t("admin.roleUpdated"));
       load();
     } catch (err) {
-      toast.error(err.message || "Erreur");
+      toast.error(err.message || t("common.error"));
     }
   }
 
   async function remove(u) {
-    if (!confirm(`Supprimer ${u.full_name} ?`)) return;
+    if (!confirm(t("admin.confirmDelete", { name: u.full_name }))) return;
     try {
       await adminDeleteUser(u.id);
-      toast.success("Utilisateur supprimé");
+      toast.success(t("admin.userDeleted"));
       load();
     } catch (err) {
-      toast.error(err.message || "Erreur");
+      toast.error(err.message || t("common.error"));
     }
   }
 
@@ -90,15 +92,17 @@ export function Admin() {
               <Shield className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle>Gestion des utilisateurs</CardTitle>
+              <CardTitle>{t("admin.userManagement")}</CardTitle>
               <CardDescription>
-                {users.length} {users.length === 1 ? "utilisateur" : "utilisateurs"} enregistré(s)
+                {users.length}{" "}
+                {users.length === 1 ? t("admin.user") : t("admin.users")}{" "}
+                {t("admin.registered")}
               </CardDescription>
             </div>
           </div>
           <Button onClick={() => setShowForm(true)}>
             <UserPlus className="h-3.5 w-3.5" />
-            Nouvel utilisateur
+            {t("admin.newUser")}
           </Button>
         </CardHeader>
         <CardContent>
@@ -107,7 +111,7 @@ export function Admin() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Rechercher par nom, email ou département..."
+              placeholder={t("admin.searchPlaceholder")}
               className="pl-9"
             />
           </div>
@@ -117,11 +121,13 @@ export function Admin() {
       <Card className="flex-1 overflow-hidden">
         <CardContent className="p-0">
           {loading ? (
-            <div className="p-6 text-center text-xs text-text-muted">Chargement...</div>
+            <div className="p-6 text-center text-xs text-text-muted">
+              {t("common.loading")}
+            </div>
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16">
               <Users className="h-10 w-10 text-text-muted opacity-40" />
-              <p className="text-sm text-text-secondary">Aucun utilisateur</p>
+              <p className="text-sm text-text-secondary">{t("admin.noUsers")}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -129,22 +135,22 @@ export function Admin() {
                 <thead>
                   <tr className="border-b border-border bg-surface/40">
                     <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                      Nom
+                      {t("admin.name")}
                     </th>
                     <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                      Email
+                      {t("admin.email")}
                     </th>
                     <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                      Département
+                      {t("admin.department")}
                     </th>
                     <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                      Rôle
+                      {t("admin.role")}
                     </th>
                     <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                      Statut
+                      {t("admin.status")}
                     </th>
                     <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider text-text-muted">
-                      Actions
+                      {t("admin.actions")}
                     </th>
                   </tr>
                 </thead>
@@ -161,7 +167,7 @@ export function Admin() {
                         {u.full_name}
                         {u.id === me?.id && (
                           <span className="ml-2 rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] text-primary">
-                            vous
+                            {t("admin.you")}
                           </span>
                         )}
                       </td>
@@ -176,20 +182,20 @@ export function Admin() {
                           disabled={u.id === me?.id}
                           className="rounded border border-border bg-surface-2/50 px-2 py-1 text-xs text-text-primary disabled:opacity-50"
                         >
-                          <option value="admin">Admin</option>
-                          <option value="agent">Agent</option>
-                          <option value="viewer">Viewer</option>
+                          <option value="admin">{t("roles.admin")}</option>
+                          <option value="agent">{t("roles.agent")}</option>
+                          <option value="viewer">{t("roles.viewer")}</option>
                         </select>
                       </td>
                       <td className="px-4 py-3">
                         <Badge variant={u.is_active ? "success" : "danger"}>
                           {u.is_active ? (
                             <>
-                              <CheckCircle2 className="h-3 w-3" /> Actif
+                              <CheckCircle2 className="h-3 w-3" /> {t("admin.active")}
                             </>
                           ) : (
                             <>
-                              <XCircle className="h-3 w-3" /> Inactif
+                              <XCircle className="h-3 w-3" /> {t("admin.inactive")}
                             </>
                           )}
                         </Badge>
@@ -199,7 +205,7 @@ export function Admin() {
                           <button
                             onClick={() => toggleActive(u)}
                             disabled={u.id === me?.id}
-                            title={u.is_active ? "Désactiver" : "Activer"}
+                            title={u.is_active ? t("admin.inactive") : t("admin.active")}
                             className="rounded p-1.5 text-text-muted transition-colors hover:bg-white/5 hover:text-text-primary disabled:opacity-30"
                           >
                             {u.is_active ? (
@@ -211,7 +217,7 @@ export function Admin() {
                           <button
                             onClick={() => remove(u)}
                             disabled={u.id === me?.id}
-                            title="Supprimer"
+                            title={t("common.delete")}
                             className="rounded p-1.5 text-text-muted transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-30"
                           >
                             <Trash2 className="h-3.5 w-3.5" />

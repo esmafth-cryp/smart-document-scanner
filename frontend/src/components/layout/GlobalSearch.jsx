@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, FileText, X, Loader2, ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { fetchScans } from "../../api/scans";
 
 export function GlobalSearch({ onSelectScan, onSeeAll }) {
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
@@ -49,7 +51,7 @@ export function GlobalSearch({ onSelectScan, onSeeAll }) {
   function formatDate(iso) {
     if (!iso) return "";
     const d = new Date(iso);
-    return d.toLocaleString("fr-FR", {
+    return d.toLocaleString(i18n.language === "en" ? "en-GB" : "fr-FR", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -83,7 +85,7 @@ export function GlobalSearch({ onSelectScan, onSeeAll }) {
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
-          placeholder="Rechercher un document..."
+          placeholder={t("search.placeholder")}
           className="h-9 w-72 rounded-lg border border-border bg-surface-2/50 pl-9 pr-8 text-sm text-text-primary placeholder:text-text-muted focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
         />
         {query && (
@@ -106,11 +108,11 @@ export function GlobalSearch({ onSelectScan, onSeeAll }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full z-[100] mt-2 w-96 overflow-hidden rounded-xl border border-border-strong bg-[#0d1224] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.9)]"
+            className="absolute right-0 top-full z-[100] mt-2 w-96 overflow-hidden rounded-xl border border-border-strong bg-surface shadow-[0_20px_60px_-10px_rgba(0,0,0,0.4)]"
           >
             <div className="border-b border-border px-4 py-2.5">
               <p className="text-[10px] uppercase tracking-wider text-text-muted">
-                Résultats pour "{query}"
+                {t("search.resultsFor", { query })}
               </p>
             </div>
 
@@ -118,11 +120,11 @@ export function GlobalSearch({ onSelectScan, onSeeAll }) {
               {loading ? (
                 <div className="flex items-center justify-center gap-2 p-6 text-xs text-text-muted">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  Recherche...
+                  {t("search.searching")}
                 </div>
               ) : results.length === 0 ? (
                 <div className="p-6 text-center text-xs text-text-muted">
-                  Aucun résultat
+                  {t("search.noResults")}
                 </div>
               ) : (
                 results.map((scan) => (
@@ -139,7 +141,7 @@ export function GlobalSearch({ onSelectScan, onSeeAll }) {
                         {scan.original_filename}
                       </p>
                       <div className="mt-0.5 flex items-center gap-2 text-[10px] text-text-muted">
-                        <span>{scan.document_type?.label || "Type inconnu"}</span>
+                        <span>{scan.document_type?.label || t("search.unknownType")}</span>
                         <span>•</span>
                         <span>{formatDate(scan.created_at)}</span>
                       </div>
@@ -154,7 +156,7 @@ export function GlobalSearch({ onSelectScan, onSeeAll }) {
                 onClick={handleSeeAll}
                 className="flex w-full items-center justify-center gap-2 border-t border-border bg-surface/40 px-4 py-2.5 text-xs text-primary transition-colors hover:bg-primary/5"
               >
-                Voir tous les résultats dans l'historique
+                {t("search.seeAll")}
                 <ArrowRight className="h-3 w-3" />
               </button>
             )}

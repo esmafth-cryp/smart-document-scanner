@@ -1,22 +1,24 @@
 import { FileText, Eye, Clock, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Badge } from "../ui/Badge";
 import { Skeleton } from "../ui/Skeleton";
 
 const STATUS_MAP = {
-  pending: { label: "En attente", variant: "warning", icon: Clock },
-  validated: { label: "Validé", variant: "success", icon: CheckCircle2 },
-  corrected: { label: "Corrigé", variant: "cyan", icon: AlertCircle },
-  rejected: { label: "Rejeté", variant: "danger", icon: XCircle },
+  pending: { labelKey: "history.pending", variant: "warning", icon: Clock },
+  validated: { labelKey: "history.validated", variant: "success", icon: CheckCircle2 },
+  corrected: { labelKey: "history.corrected", variant: "cyan", icon: AlertCircle },
+  rejected: { labelKey: "history.rejected", variant: "danger", icon: XCircle },
 };
 
 function StatusBadge({ status }) {
+  const { t } = useTranslation();
   const s = STATUS_MAP[status] || STATUS_MAP.pending;
   const Icon = s.icon;
   return (
     <Badge variant={s.variant}>
       <Icon className="h-3 w-3" />
-      {s.label}
+      {t(s.labelKey)}
     </Badge>
   );
 }
@@ -35,10 +37,10 @@ function ConfidenceBar({ value }) {
   );
 }
 
-function formatDate(iso) {
+function formatDate(iso, lang) {
   if (!iso) return "-";
   const d = new Date(iso);
-  return d.toLocaleString("fr-FR", {
+  return d.toLocaleString(lang === "en" ? "en-GB" : "fr-FR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -48,6 +50,8 @@ function formatDate(iso) {
 }
 
 export function ScansTable({ scans, loading, onRowClick }) {
+  const { t, i18n } = useTranslation();
+
   if (loading) {
     return (
       <div className="space-y-2">
@@ -62,8 +66,8 @@ export function ScansTable({ scans, loading, onRowClick }) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-surface/30 py-16">
         <FileText className="h-10 w-10 text-text-muted opacity-40" />
-        <p className="text-sm text-text-secondary">Aucun scan pour l'instant</p>
-        <p className="text-xs text-text-muted">Scannez un document pour le voir apparaître ici.</p>
+        <p className="text-sm text-text-secondary">{t("history.noResults")}</p>
+        <p className="text-xs text-text-muted">{t("history.emptyHint")}</p>
       </div>
     );
   }
@@ -74,22 +78,22 @@ export function ScansTable({ scans, loading, onRowClick }) {
         <thead>
           <tr className="border-b border-border bg-surface/40">
             <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
-              Date
+              {t("history.date")}
             </th>
             <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
-              Fichier
+              {t("history.file")}
             </th>
             <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
-              Type
+              {t("history.documentType")}
             </th>
             <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
-              Statut
+              {t("history.status")}
             </th>
             <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
-              Confiance
+              {t("history.confidence")}
             </th>
             <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider text-text-muted">
-              Actions
+              {t("history.actions")}
             </th>
           </tr>
         </thead>
@@ -104,7 +108,7 @@ export function ScansTable({ scans, loading, onRowClick }) {
               className="cursor-pointer border-b border-border transition-colors last:border-0 hover:bg-white/[0.02]"
             >
               <td className="px-4 py-3 text-xs text-text-secondary tabular-nums">
-                {formatDate(scan.created_at)}
+                {formatDate(scan.created_at, i18n.language)}
               </td>
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
@@ -134,7 +138,7 @@ export function ScansTable({ scans, loading, onRowClick }) {
                     onRowClick(scan);
                   }}
                   className="rounded p-1.5 text-text-muted transition-colors hover:bg-white/5 hover:text-primary"
-                  title="Voir le détail"
+                  title={t("history.viewDetail")}
                 >
                   <Eye className="h-3.5 w-3.5" />
                 </button>
