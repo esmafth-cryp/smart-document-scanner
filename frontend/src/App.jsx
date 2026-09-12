@@ -14,6 +14,7 @@ import { JsonViewer } from "./components/scan/JsonViewer";
 import { Card, CardContent } from "./components/ui/Card";
 import { Button } from "./components/ui/Button";
 import { History } from "./pages/History";
+import { Dashboard } from "./pages/Dashboard";
 
 export default function App() {
   const [active, setActive] = useState("scan");
@@ -84,6 +85,25 @@ export default function App() {
 
   const previewStatus = isLoading ? "processing" : result ? "done" : selectedImage ? "ready" : "idle";
   const currentStep = isLoading ? 1 : result ? 4 : 0;
+
+  // Page Dashboard
+  if (active === "dashboard") {
+    return (
+      <>
+        <AmbientBackground />
+        <div className="relative z-10 h-full">
+          <AppLayout
+            active={active}
+            onNavigate={setActive}
+            title="Tableau de bord"
+            subtitle="Vue d'ensemble de votre activité documentaire"
+          >
+            <Dashboard onNavigate={setActive} />
+          </AppLayout>
+        </div>
+      </>
+    );
+  }
 
   // Page Historique
   if (active === "history") {

@@ -1,7 +1,7 @@
 from pathlib import Path
 from uuid import uuid4
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
@@ -38,6 +38,7 @@ def create_app():
 
     from models import User, DocumentType, Scan, ExtractedField, Correction, AuditLog  # noqa
 
+    app.register_blueprint(scan_bp, url_prefix="/api")
     app.register_blueprint(stats_bp, url_prefix="/api")
 
     BASE_DIR = Path(__file__).resolve().parent
@@ -72,9 +73,9 @@ def create_app():
                 "message": "Le serveur Flask fonctionne correctement.",
             }
         )
+
     @app.get("/api/uploads/<path:filename>")
     def serve_upload(filename):
-        from flask import send_from_directory
         return send_from_directory(UPLOAD_FOLDER, filename)
 
     @app.post("/api/scan")
