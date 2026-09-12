@@ -16,7 +16,6 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(get_config())
 
-    # === Extensions ===
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
@@ -35,10 +34,8 @@ def create_app():
         },
     )
 
-    # === Import des models (nécessaire pour Alembic) ===
     from models import User, DocumentType, Scan, ExtractedField, Correction, AuditLog  # noqa
 
-    # === Configuration uploads ===
     BASE_DIR = Path(__file__).resolve().parent
     UPLOAD_FOLDER = BASE_DIR / "uploads"
     UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
@@ -53,8 +50,6 @@ def create_app():
             "." in filename
             and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
         )
-
-    # === Routes ===
 
     @app.get("/")
     def home():
@@ -149,9 +144,24 @@ def create_app():
                 500,
             )
 
+        scan_id = None
+        try:
+            from services.scan_service import save_scan
+            scan = save_scan(
+                original_filename=original_filename,
+                saved_filename=saved_filename,
+                document_data=document_data,
+                raw_text=ocr_result.get("text", ""),
+                lines=ocr_result.get("lines", []),
+            )
+            scan_id = scan.id
+        except Exception as error:
+            print(f"[WARN] Echec sauvegarde DB : {error}")
+
         return jsonify(
             {
                 "success": True,
+                "scan_id": scan_id,
                 "filename": original_filename,
                 "saved_filename": saved_filename,
                 "message": "Document analysé avec succès.",
@@ -160,8 +170,6 @@ def create_app():
                 "document": document_data,
             }
         )
-
-    # === Error handlers ===
 
     @app.errorhandler(413)
     def file_too_large(_error):
