@@ -20,6 +20,7 @@ import { Admin } from "./pages/Admin";
 import { Settings } from "./pages/Settings";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { ScanDetailModal } from "./components/history/ScanDetailModal";
+import { ChatWidget } from "./components/chat/ChatWidget";
 
 export default function App() {
   const { t } = useTranslation();
@@ -282,6 +283,8 @@ export default function App() {
           onClose={() => setSearchedScan(null)}
         />
       )}
+
+      <ChatWidget />
     </ProtectedRoute>
   );
 }

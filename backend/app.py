@@ -13,6 +13,7 @@ from services.parser_service import parse_document
 from routes.scan_routes import scan_bp
 from routes.stats_routes import stats_bp
 from routes.auth_routes import auth_bp
+from routes.chat_routes import chat_bp
 
 
 def create_app():
@@ -32,6 +33,7 @@ def create_app():
                     "http://127.0.0.1:5173",
                     "http://localhost:8080",
                     "http://127.0.0.1:8080",
+                    "https://esmafth-sds.duckdns.org",
                 ]
             }
         },
@@ -42,6 +44,7 @@ def create_app():
     app.register_blueprint(scan_bp, url_prefix="/api")
     app.register_blueprint(stats_bp, url_prefix="/api")
     app.register_blueprint(auth_bp, url_prefix="/api")
+    app.register_blueprint(chat_bp, url_prefix="/api")
 
     BASE_DIR = Path(__file__).resolve().parent
     UPLOAD_FOLDER = BASE_DIR / "uploads"

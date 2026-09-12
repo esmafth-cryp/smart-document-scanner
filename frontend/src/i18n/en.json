@@ -256,5 +256,14 @@
   "theme": {
     "lightMode": "Switch to light mode",
     "darkMode": "Switch to dark mode"
+  },
+  "chat": {
+    "title": "AI Assistant",
+    "subtitle": "Ask me anything",
+    "open": "Open assistant",
+    "welcome": "Hello! I'm your assistant. Ask me a question about your documents, statistics or users.",
+    "placeholder": "Type your question...",
+    "suggestions": "Suggestions",
+    "error": "Sorry, an error occurred. Please try again."
   }
 }

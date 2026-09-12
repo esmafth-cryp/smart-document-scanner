@@ -256,5 +256,14 @@
   "theme": {
     "lightMode": "Passer en mode clair",
     "darkMode": "Passer en mode sombre"
+  },
+  "chat": {
+    "title": "Assistant IA",
+    "subtitle": "Posez-moi vos questions",
+    "open": "Ouvrir l'assistant",
+    "welcome": "Bonjour ! Je suis votre assistant. Posez-moi une question sur vos documents, vos statistiques ou vos utilisateurs.",
+    "placeholder": "Écrivez votre question...",
+    "suggestions": "Suggestions",
+    "error": "Désolé, une erreur est survenue. Réessayez."
   }
 }
