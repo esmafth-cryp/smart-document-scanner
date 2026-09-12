@@ -15,9 +15,10 @@ import { Card, CardContent } from "./components/ui/Card";
 import { Button } from "./components/ui/Button";
 import { History } from "./pages/History";
 import { Dashboard } from "./pages/Dashboard";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { useAuth } from "./contexts/AuthContext";
 
-export default function App() {
-  const [active, setActive] = useState("scan");
+function ScanPage({ active, setActive }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [result, setResult] = useState(null);
@@ -86,128 +87,131 @@ export default function App() {
   const previewStatus = isLoading ? "processing" : result ? "done" : selectedImage ? "ready" : "idle";
   const currentStep = isLoading ? 1 : result ? 4 : 0;
 
-  // Page Dashboard
-  if (active === "dashboard") {
-    return (
-      <>
-        <AmbientBackground />
-        <div className="relative z-10 h-full">
-          <AppLayout
-            active={active}
-            onNavigate={setActive}
-            title="Tableau de bord"
-            subtitle="Vue d'ensemble de votre activité documentaire"
-          >
-            <Dashboard onNavigate={setActive} />
-          </AppLayout>
-        </div>
-      </>
-    );
-  }
-
-  // Page Historique
-  if (active === "history") {
-    return (
-      <>
-        <AmbientBackground />
-        <div className="relative z-10 h-full">
-          <AppLayout
-            active={active}
-            onNavigate={setActive}
-            title="Historique"
-            subtitle="Consultez tous les documents scannés"
-          >
-            <History />
-          </AppLayout>
-        </div>
-      </>
-    );
-  }
-
-  // Page Scan (par défaut)
   return (
-    <>
-      <AmbientBackground />
-      <div className="relative z-10">
-        <AppLayout
-          active={active}
-          onNavigate={setActive}
-          title="Scanner un document"
-          subtitle="Importez, analysez, validez et exportez vos documents"
-        >
-          <div className="flex h-full">
-            {/* Zone centrale */}
-            <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto p-6">
-              <Card>
-                <CardContent className="flex items-center justify-between py-4">
-                  <WorkflowStepper
-                    currentStep={currentStep}
-                    status={isLoading ? "processing" : result ? "done" : "idle"}
-                  />
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={reset} disabled={!selectedFile}>
-                      <RefreshCw className="h-3.5 w-3.5" />
-                      Réinitialiser
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={analyzeDocument}
-                      disabled={!selectedFile}
-                      isLoading={isLoading}
-                    >
-                      {isLoading ? "Analyse..." : "Analyser"}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="flex-1 overflow-hidden">
-                <CardContent className="h-full p-0">
-                  {selectedImage ? (
-                    <DocumentPreview
-                      image={selectedImage}
-                      status={previewStatus}
-                      onZoom={() => window.open(selectedImage, "_blank")}
-                    >
-                      <ProcessingOverlay isRunning={isLoading} isDone={!!result} />
-                    </DocumentPreview>
-                  ) : (
-                    <div className="h-full p-6">
-                      <DropZone onFile={handleFile} />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Panneau droit */}
-            <aside className="w-[400px] shrink-0 overflow-y-auto border-l border-border bg-surface/20 p-6">
-              <div className="mb-4">
-                <h2 className="text-sm font-semibold text-text-primary">Informations extraites</h2>
-                <p className="mt-0.5 text-xs text-text-muted">
-                  {result ? "Analyse terminée" : "En attente d'analyse"}
-                </p>
-              </div>
-
-              <ExtractedFields data={result?.document || {}} loading={isLoading} />
-
-              {result && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-5"
+    <AppLayout
+      active={active}
+      onNavigate={setActive}
+      title="Scanner un document"
+      subtitle="Importez, analysez, validez et exportez vos documents"
+    >
+      <div className="flex h-full">
+        <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto p-6">
+          <Card>
+            <CardContent className="flex items-center justify-between py-4">
+              <WorkflowStepper
+                currentStep={currentStep}
+                status={isLoading ? "processing" : result ? "done" : "idle"}
+              />
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={reset} disabled={!selectedFile}>
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  Réinitialiser
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={analyzeDocument}
+                  disabled={!selectedFile}
+                  isLoading={isLoading}
                 >
-                  <JsonViewer data={result} />
-                  <Button className="mt-4 w-full" onClick={exportToJson}>
-                    <Download className="h-4 w-4" />
-                    Exporter en JSON
-                  </Button>
-                </motion.div>
+                  {isLoading ? "Analyse..." : "Analyser"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="flex-1 overflow-hidden">
+            <CardContent className="h-full p-0">
+              {selectedImage ? (
+                <DocumentPreview
+                  image={selectedImage}
+                  status={previewStatus}
+                  onZoom={() => window.open(selectedImage, "_blank")}
+                >
+                  <ProcessingOverlay isRunning={isLoading} isDone={!!result} />
+                </DocumentPreview>
+              ) : (
+                <div className="h-full p-6">
+                  <DropZone onFile={handleFile} />
+                </div>
               )}
-            </aside>
+            </CardContent>
+          </Card>
+        </div>
+
+        <aside className="w-[400px] shrink-0 overflow-y-auto border-l border-border bg-surface/20 p-6">
+          <div className="mb-4">
+            <h2 className="text-sm font-semibold text-text-primary">Informations extraites</h2>
+            <p className="mt-0.5 text-xs text-text-muted">
+              {result ? "Analyse terminée" : "En attente d'analyse"}
+            </p>
           </div>
-        </AppLayout>
+
+          <ExtractedFields data={result?.document || {}} loading={isLoading} />
+
+          {result && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-5"
+            >
+              <JsonViewer data={result} />
+              <Button className="mt-4 w-full" onClick={exportToJson}>
+                <Download className="h-4 w-4" />
+                Exporter en JSON
+              </Button>
+            </motion.div>
+          )}
+        </aside>
       </div>
-    </>
+    </AppLayout>
+  );
+}
+
+export default function App() {
+  const [active, setActive] = useState("scan");
+
+  return (
+    <ProtectedRoute>
+      {active === "dashboard" && (
+        <>
+          <AmbientBackground />
+          <div className="relative z-10 h-full">
+            <AppLayout
+              active={active}
+              onNavigate={setActive}
+              title="Tableau de bord"
+              subtitle="Vue d'ensemble de votre activité documentaire"
+            >
+              <Dashboard onNavigate={setActive} />
+            </AppLayout>
+          </div>
+        </>
+      )}
+
+      {active === "history" && (
+        <>
+          <AmbientBackground />
+          <div className="relative z-10 h-full">
+            <AppLayout
+              active={active}
+              onNavigate={setActive}
+              title="Historique"
+              subtitle="Consultez tous les documents scannés"
+            >
+              <History />
+            </AppLayout>
+          </div>
+        </>
+      )}
+
+      {active !== "dashboard" && active !== "history" && (
+        <>
+          <AmbientBackground />
+          <div className="relative z-10">
+            <ScanPage active={active} setActive={setActive} />
+          </div>
+        </>
+      )}
+    </ProtectedRoute>
   );
 }

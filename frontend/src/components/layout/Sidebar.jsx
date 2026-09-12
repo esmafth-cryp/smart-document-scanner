@@ -1,16 +1,32 @@
 import { motion } from "framer-motion";
-import { FileScan, LayoutDashboard, History, Settings, ChevronLeft, Shield } from "lucide-react";
+import {
+  FileScan,
+  LayoutDashboard,
+  History,
+  Settings,
+  ChevronLeft,
+  Shield,
+  LogOut,
+  User as UserIcon,
+} from "lucide-react";
 import { cn } from "../../lib/utils";
+import { useAuth } from "../../contexts/AuthContext";
 
 const navItems = [
   { id: "dashboard", label: "Tableau de bord", icon: LayoutDashboard },
   { id: "scan", label: "Scanner", icon: FileScan },
   { id: "history", label: "Historique", icon: History },
-  { id: "admin", label: "Administration", icon: Shield },
+  { id: "admin", label: "Administration", icon: Shield, roles: ["admin"] },
   { id: "settings", label: "Paramètres", icon: Settings },
 ];
 
 export function Sidebar({ active = "scan", onNavigate, collapsed = false, onToggle }) {
+  const { user, signOut, role } = useAuth();
+
+  const visibleItems = navItems.filter(
+    (item) => !item.roles || item.roles.includes(role)
+  );
+
   return (
     <motion.aside
       animate={{ width: collapsed ? 72 : 240 }}
@@ -32,7 +48,7 @@ export function Sidebar({ active = "scan", onNavigate, collapsed = false, onTogg
 
       {/* Nav */}
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {navItems.map((item) => {
+        {visibleItems.map((item) => {
           const isActive = active === item.id;
           const Icon = item.icon;
           return (
@@ -61,10 +77,41 @@ export function Sidebar({ active = "scan", onNavigate, collapsed = false, onTogg
         })}
       </nav>
 
+      {/* User */}
+      <div className="border-t border-border p-3">
+        {!collapsed && (
+          <div className="mb-2 flex items-center gap-2 rounded-lg bg-surface-2/40 p-2">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+              <UserIcon className="h-4 w-4 text-primary" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-medium text-text-primary">
+                {user?.full_name || "Utilisateur"}
+              </p>
+              <p className="truncate text-[10px] text-text-muted capitalize">
+                {user?.role || "—"}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={signOut}
+          title="Déconnexion"
+          className={cn(
+            "flex h-9 w-full items-center gap-3 rounded-lg px-3 text-xs text-text-muted transition-colors hover:bg-danger/10 hover:text-danger",
+            collapsed && "justify-center"
+          )}
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>Déconnexion</span>}
+        </button>
+      </div>
+
       {/* Toggle */}
       <button
         onClick={onToggle}
-        className="flex h-12 items-center justify-center border-t border-border text-text-muted transition-colors hover:bg-white/5 hover:text-text-primary"
+        className="flex h-10 items-center justify-center border-t border-border text-text-muted transition-colors hover:bg-white/5 hover:text-text-primary"
       >
         <ChevronLeft className={cn("h-4 w-4 transition-transform", collapsed && "rotate-180")} />
       </button>

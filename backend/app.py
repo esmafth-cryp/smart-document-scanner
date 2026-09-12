@@ -12,6 +12,7 @@ from services.ocr_service import extract_text
 from services.parser_service import parse_document
 from routes.scan_routes import scan_bp
 from routes.stats_routes import stats_bp
+from routes.auth_routes import auth_bp
 
 
 def create_app():
@@ -40,6 +41,7 @@ def create_app():
 
     app.register_blueprint(scan_bp, url_prefix="/api")
     app.register_blueprint(stats_bp, url_prefix="/api")
+    app.register_blueprint(auth_bp, url_prefix="/api")
 
     BASE_DIR = Path(__file__).resolve().parent
     UPLOAD_FOLDER = BASE_DIR / "uploads"
