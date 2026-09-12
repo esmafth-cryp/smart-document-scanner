@@ -1,11 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Download, Loader2, FileText, Image as ImageIcon } from "lucide-react";
+import {
+  X,
+  Download,
+  Loader2,
+  FileText,
+  Image as ImageIcon,
+  Edit3,
+  Save,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 import { Button } from "../ui/Button";
 import { Badge } from "../ui/Badge";
-import { fetchScanDetail } from "../../api/scans";
+import { Input } from "../ui/Input";
+import { fetchScanDetail, validateScan, getExportUrl } from "../../api/scans";
 
 const FIELD_LABELS = {
   document_type: "Type de document",
@@ -22,10 +31,13 @@ const FIELD_LABELS = {
 export function ScanDetailModal({ scan, onClose }) {
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [edits, setEdits] = useState({});
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!scan) return;
     setLoading(true);
+    setEdits({});
     fetchScanDetail(scan.id)
       .then((res) => setDetail(res.scan))
       .catch(() => toast.error("Impossible de charger le détail"))
@@ -38,18 +50,55 @@ export function ScanDetailModal({ scan, onClose }) {
     return () => window.removeEventListener("keydown", onEsc);
   }, [onClose]);
 
-  function exportJson() {
-    if (!detail) return;
-    const blob = new Blob([JSON.stringify(detail, null, 2)], {
-      type: "application/json",
+  const hasChanges = useMemo(() => Object.keys(edits).length > 0, [edits]);
+
+  function setFieldEdit(key, value) {
+    setEdits((prev) => {
+      const next = { ...prev };
+      const original =
+        detail?.extracted?.[key]?.validated || detail?.extracted?.[key]?.raw || "";
+      if (value === original) delete next[key];
+      else next[key] = value;
+      return next;
     });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `scan_${detail.id.slice(0, 8)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("JSON téléchargé");
+  }
+
+  async function handleValidate() {
+    if (!detail) return;
+    setSaving(true);
+    try {
+      await validateScan(detail.id, edits);
+      toast.success("Scan validé et corrections enregistrées");
+      setEdits({});
+      onClose();
+    } catch (err) {
+      toast.error(err.message || "Erreur de validation");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+    async function exportFile(format) {
+    if (!detail) return;
+    try {
+      const url = getExportUrl(detail.id, format);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Erreur d'export");
+
+      const blob = await res.blob();
+      const downloadUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = `scan_${detail.id.slice(0, 8)}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(downloadUrl);
+
+      toast.success(`Export ${format.toUpperCase()} téléchargé`);
+    } catch (err) {
+      toast.error(err.message || "Erreur d'export");
+    }
   }
 
   return (
@@ -70,24 +119,32 @@ export function ScanDetailModal({ scan, onClose }) {
             onClick={(e) => e.stopPropagation()}
             className="relative flex max-h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-border bg-[#0d1224] shadow-2xl"
           >
-            {/* Header */}
             <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between border-b border-border bg-[#0d1224]/95 px-6 py-4 backdrop-blur">
               <div className="flex items-center gap-3">
                 <FileText className="h-4 w-4 text-primary" />
                 <div>
-                  <h2 className="text-sm font-semibold text-text-primary">
-                    Détail du scan
-                  </h2>
-                  <p className="text-[11px] text-text-muted">
-                    {scan.original_filename}
-                  </p>
+                  <h2 className="text-sm font-semibold text-text-primary">Détail du scan</h2>
+                  <p className="text-[11px] text-text-muted">{scan.original_filename}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="secondary" size="sm" onClick={exportJson} disabled={!detail}>
-                  <Download className="h-3.5 w-3.5" />
-                  Exporter JSON
-                </Button>
+                <div className="group relative">
+                  <Button variant="secondary" size="sm">
+                    <Download className="h-3.5 w-3.5" />
+                    Exporter
+                  </Button>
+                  <div className="invisible absolute right-0 top-full z-20 mt-1 w-36 overflow-hidden rounded-lg border border-border bg-[#131826] opacity-0 shadow-xl transition-all group-hover:visible group-hover:opacity-100">
+                    {["json", "csv", "xlsx"].map((fmt) => (
+                      <button
+                        key={fmt}
+                        onClick={() => exportFile(fmt)}
+                        className="block w-full px-3 py-2 text-left text-xs text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary"
+                      >
+                        {fmt.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <button
                   onClick={onClose}
                   className="rounded-lg p-2 text-text-muted transition-colors hover:bg-white/5 hover:text-text-primary"
@@ -97,9 +154,7 @@ export function ScanDetailModal({ scan, onClose }) {
               </div>
             </div>
 
-            {/* Body */}
-            <div className="flex w-full gap-6 overflow-y-auto p-6 pt-20">
-              {/* Colonne gauche : image */}
+            <div className="flex w-full gap-6 overflow-y-auto p-6 pb-24 pt-20">
               <div className="w-1/2 shrink-0">
                 <div className="sticky top-6 rounded-xl border border-border bg-surface/30 p-4">
                   {detail?.saved_filename ? (
@@ -119,7 +174,6 @@ export function ScanDetailModal({ scan, onClose }) {
                 </div>
               </div>
 
-              {/* Colonne droite : champs */}
               <div className="flex-1 space-y-5">
                 {loading ? (
                   <div className="flex items-center justify-center py-20">
@@ -127,12 +181,17 @@ export function ScanDetailModal({ scan, onClose }) {
                   </div>
                 ) : detail ? (
                   <>
-                    {/* Meta */}
                     <div className="flex flex-wrap gap-2">
                       {detail.document_type && (
                         <Badge variant="primary">{detail.document_type.label}</Badge>
                       )}
-                      <Badge variant="warning">{detail.status}</Badge>
+                      <Badge
+                        variant={
+                          detail.status === "validated" ? "success" : "warning"
+                        }
+                      >
+                        {detail.status === "validated" ? "Validé" : "En attente"}
+                      </Badge>
                       {detail.ocr_confidence && (
                         <Badge variant="cyan">
                           OCR {Math.round(detail.ocr_confidence * 100)}%
@@ -140,29 +199,47 @@ export function ScanDetailModal({ scan, onClose }) {
                       )}
                     </div>
 
-                    {/* Fields */}
                     <div>
-                      <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
-                        Informations extraites
-                      </h3>
+                      <div className="mb-3 flex items-center gap-2">
+                        <Edit3 className="h-3.5 w-3.5 text-primary" />
+                        <h3 className="text-xs font-medium uppercase tracking-wider text-text-muted">
+                          Informations extraites (éditables)
+                        </h3>
+                      </div>
                       <div className="grid grid-cols-2 gap-3">
-                        {Object.entries(detail.extracted || {}).map(([key, obj]) => (
-                          <div
-                            key={key}
-                            className="rounded-lg border border-border bg-surface/40 p-3"
-                          >
-                            <p className="text-[10px] uppercase tracking-wider text-text-muted">
-                              {FIELD_LABELS[key] || key}
-                            </p>
-                            <p className="mt-1 truncate text-sm text-text-primary">
-                              {obj.validated || obj.raw || "-"}
-                            </p>
-                          </div>
-                        ))}
+                        {Object.entries(detail.extracted || {}).map(([key, obj]) => {
+                          const value = obj.validated || obj.raw || "";
+                          const isEditing = key in edits;
+                          return (
+                            <div
+                              key={key}
+                              className={`rounded-lg border p-3 transition-colors ${
+                                isEditing
+                                  ? "border-primary/50 bg-primary/5"
+                                  : "border-border bg-surface/40"
+                              }`}
+                            >
+                              <div className="mb-1.5 flex items-center justify-between">
+                                <p className="text-[10px] uppercase tracking-wider text-text-muted">
+                                  {FIELD_LABELS[key] || key}
+                                </p>
+                                {isEditing && (
+                                  <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-medium text-primary">
+                                    modifié
+                                  </span>
+                                )}
+                              </div>
+                              <Input
+                                value={edits[key] ?? value}
+                                onChange={(e) => setFieldEdit(key, e.target.value)}
+                                className="!h-8 !text-xs"
+                              />
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
 
-                    {/* Raw text */}
                     <div>
                       <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
                         Texte OCR brut
@@ -176,6 +253,22 @@ export function ScanDetailModal({ scan, onClose }) {
                   <p className="text-sm text-text-muted">Chargement...</p>
                 )}
               </div>
+            </div>
+
+            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between border-t border-border bg-[#0d1224]/95 px-6 py-3 backdrop-blur">
+              <p className="text-[11px] text-text-muted">
+                {hasChanges
+                  ? `${Object.keys(edits).length} champ(s) modifié(s)`
+                  : "Aucune modification"}
+              </p>
+              <Button
+                onClick={handleValidate}
+                disabled={!hasChanges || saving}
+                isLoading={saving}
+              >
+                {!saving && <Save className="h-3.5 w-3.5" />}
+                Valider et enregistrer
+              </Button>
             </div>
           </motion.div>
         </motion.div>

@@ -24,3 +24,16 @@ export async function fetchScanDetail(scanId) {
   if (!res.ok) throw new Error("Erreur de chargement du détail");
   return res.json();
 }
+export async function validateScan(scanId, corrections) {
+  const res = await fetch(`/api/scans/${scanId}/validate`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ corrections }),
+  });
+  if (!res.ok) throw new Error("Erreur lors de la validation");
+  return res.json();
+}
+
+export function getExportUrl(scanId, format) {
+  return `/api/scans/${scanId}/export?format=${format}`;
+}
