@@ -17,11 +17,7 @@ import { Button } from "../components/ui/Button";
 import { Badge } from "../components/ui/Badge";
 import { Input } from "../components/ui/Input";
 import { UserFormModal } from "../components/admin/UserFormModal";
-import {
-  fetchUsers,
-  adminUpdateUser,
-  adminDeleteUser,
-} from "../api/auth";
+import { fetchUsers, adminUpdateUser, adminDeleteUser } from "../api/auth";
 import { useAuth } from "../contexts/AuthContext";
 
 export function Admin() {
@@ -84,9 +80,9 @@ export function Admin() {
   });
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-y-auto p-6">
+    <div className="flex flex-col gap-4 p-4 md:p-6">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
               <Shield className="h-4 w-4 text-primary" />
@@ -100,7 +96,7 @@ export function Admin() {
               </CardDescription>
             </div>
           </div>
-          <Button onClick={() => setShowForm(true)}>
+          <Button onClick={() => setShowForm(true)} className="self-start md:self-auto">
             <UserPlus className="h-3.5 w-3.5" />
             {t("admin.newUser")}
           </Button>
@@ -118,7 +114,7 @@ export function Admin() {
         </CardContent>
       </Card>
 
-      <Card className="flex-1 overflow-hidden">
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           {loading ? (
             <div className="p-6 text-center text-xs text-text-muted">
@@ -131,7 +127,7 @@ export function Admin() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[800px]">
                 <thead>
                   <tr className="border-b border-border bg-surface/40">
                     <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
@@ -164,14 +160,18 @@ export function Admin() {
                       className="border-b border-border last:border-0 hover:bg-white/[0.02]"
                     >
                       <td className="px-4 py-3 text-xs font-medium text-text-primary">
-                        {u.full_name}
-                        {u.id === me?.id && (
-                          <span className="ml-2 rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] text-primary">
-                            {t("admin.you")}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <span className="truncate">{u.full_name}</span>
+                          {u.id === me?.id && (
+                            <span className="shrink-0 rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] text-primary">
+                              {t("admin.you")}
+                            </span>
+                          )}
+                        </div>
                       </td>
-                      <td className="px-4 py-3 text-xs text-text-secondary">{u.email}</td>
+                      <td className="px-4 py-3 text-xs text-text-secondary">
+                        {u.email}
+                      </td>
                       <td className="px-4 py-3 text-xs text-text-secondary">
                         {u.department || "—"}
                       </td>

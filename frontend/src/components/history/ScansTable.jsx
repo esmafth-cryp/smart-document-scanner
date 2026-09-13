@@ -74,93 +74,100 @@ export function ScansTable({ scans, loading, onRowClick, onDelete }) {
 
   return (
     <div className="overflow-hidden rounded-xl border border-border">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-border bg-surface/40">
-            <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
-              {t("history.date")}
-            </th>
-            <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
-              {t("history.file")}
-            </th>
-            <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted md:table-cell">
-              {t("history.documentType")}
-            </th>
-            <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
-              {t("history.status")}
-            </th>
-            <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted lg:table-cell">
-              {t("history.confidence")}
-            </th>
-            <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider text-text-muted">
-              {t("history.actions")}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {scans.map((scan, i) => (
-            <motion.tr
-              key={scan.id}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, delay: i * 0.03 }}
-              onClick={() => onRowClick(scan)}
-              className="cursor-pointer border-b border-border transition-colors last:border-0 hover:bg-white/[0.02]"
-            >
-              <td className="px-4 py-3 text-xs text-text-secondary tabular-nums">
-                {formatDate(scan.created_at, i18n.language)}
-              </td>
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-3.5 w-3.5 shrink-0 text-primary" />
-                  <span className="truncate text-xs text-text-primary" title={scan.original_filename}>
-                    {scan.original_filename}
-                  </span>
-                </div>
-              </td>
-              <td className="hidden px-4 py-3 md:table-cell">
-                {scan.document_type ? (
-                  <span className="text-xs text-text-secondary">{scan.document_type.label}</span>
-                ) : (
-                  <span className="text-xs text-text-muted">-</span>
-                )}
-              </td>
-              <td className="px-4 py-3">
-                <StatusBadge status={scan.status} />
-              </td>
-              <td className="hidden px-4 py-3 lg:table-cell">
-                <ConfidenceBar value={scan.ocr_confidence} />
-              </td>
-              <td className="px-4 py-3 text-right">
-                <div className="flex justify-end gap-1">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRowClick(scan);
-                    }}
-                    className="rounded p-1.5 text-text-muted transition-colors hover:bg-white/5 hover:text-primary"
-                    title={t("history.viewDetail")}
-                  >
-                    <Eye className="h-3.5 w-3.5" />
-                  </button>
-                  {onDelete && (
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[700px]">
+          <thead>
+            <tr className="border-b border-border bg-surface/40">
+              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
+                {t("history.date")}
+              </th>
+              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
+                {t("history.file")}
+              </th>
+              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
+                {t("history.documentType")}
+              </th>
+              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
+                {t("history.status")}
+              </th>
+              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
+                {t("history.confidence")}
+              </th>
+              <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider text-text-muted">
+                {t("history.actions")}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {scans.map((scan, i) => (
+              <motion.tr
+                key={scan.id}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: i * 0.03 }}
+                onClick={() => onRowClick(scan)}
+                className="cursor-pointer border-b border-border transition-colors last:border-0 hover:bg-white/[0.02]"
+              >
+                <td className="px-4 py-3 text-xs text-text-secondary tabular-nums">
+                  {formatDate(scan.created_at, i18n.language)}
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-3.5 w-3.5 shrink-0 text-primary" />
+                    <span
+                      className="truncate text-xs text-text-primary"
+                      title={scan.original_filename}
+                    >
+                      {scan.original_filename}
+                    </span>
+                  </div>
+                </td>
+                <td className="px-4 py-3">
+                  {scan.document_type ? (
+                    <span className="text-xs text-text-secondary">
+                      {scan.document_type.label}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-text-muted">-</span>
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  <StatusBadge status={scan.status} />
+                </td>
+                <td className="px-4 py-3">
+                  <ConfidenceBar value={scan.ocr_confidence} />
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex justify-end gap-1">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        onDelete(scan);
+                        onRowClick(scan);
                       }}
-                      className="rounded p-1.5 text-text-muted transition-colors hover:bg-danger/10 hover:text-danger"
-                      title={t("history.delete")}
+                      className="rounded p-1.5 text-text-muted transition-colors hover:bg-white/5 hover:text-primary"
+                      title={t("history.viewDetail")}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Eye className="h-3.5 w-3.5" />
                     </button>
-                  )}
-                </div>
-              </td>
-            </motion.tr>
-          ))}
-        </tbody>
-      </table>
+                    {onDelete && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete(scan);
+                        }}
+                        className="rounded p-1.5 text-text-muted transition-colors hover:bg-danger/10 hover:text-danger"
+                        title={t("history.delete")}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </motion.tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

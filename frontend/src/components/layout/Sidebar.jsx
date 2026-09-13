@@ -43,8 +43,10 @@ export function Sidebar({
     if (isMobileOpen) onMobileClose?.();
   }
 
+  // Contenu commun (utilisé pour desktop et mobile)
   const content = (
     <>
+      {/* Logo */}
       <div className="flex h-16 items-center justify-center border-b border-border px-4">
         {collapsed && !isMobileOpen ? (
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg gradient-primary shadow-lg shadow-primary/20">
@@ -57,6 +59,7 @@ export function Sidebar({
         )}
       </div>
 
+      {/* Nav */}
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         {visibleItems.map((item) => {
           const isActive = active === item.id;
@@ -90,6 +93,7 @@ export function Sidebar({
         })}
       </nav>
 
+      {/* User */}
       <div className="border-t border-border p-3">
         {(!collapsed || isMobileOpen) ? (
           <div className="mb-2 flex items-center gap-2 rounded-lg bg-surface-2/40 p-2">
@@ -120,6 +124,7 @@ export function Sidebar({
         </button>
       </div>
 
+      {/* Toggle (desktop uniquement) */}
       {!isMobileOpen && (
         <button
           onClick={onToggle}
@@ -133,6 +138,7 @@ export function Sidebar({
 
   return (
     <>
+      {/* Desktop : sidebar classique */}
       <motion.aside
         data-tour="sidebar"
         animate={{ width: collapsed ? 72 : 240 }}
@@ -142,9 +148,11 @@ export function Sidebar({
         {content}
       </motion.aside>
 
+      {/* Mobile : drawer */}
       <AnimatePresence>
         {isMobileOpen && (
           <>
+            {/* Overlay sombre */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -153,6 +161,8 @@ export function Sidebar({
               className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm lg:hidden"
               onClick={onMobileClose}
             />
+
+            {/* Drawer */}
             <motion.aside
               initial={{ x: -280 }}
               animate={{ x: 0 }}
@@ -160,12 +170,14 @@ export function Sidebar({
               transition={{ duration: 0.25, ease: "easeOut" }}
               className="fixed left-0 top-0 z-[95] flex h-screen w-64 flex-col border-r border-border bg-surface shadow-2xl lg:hidden"
             >
+              {/* Bouton fermer */}
               <button
                 onClick={onMobileClose}
                 className="absolute right-3 top-4 z-10 rounded-lg p-1.5 text-text-muted transition-colors hover:bg-white/5 hover:text-text-primary"
               >
                 <X className="h-4 w-4" />
               </button>
+
               {content}
             </motion.aside>
           </>

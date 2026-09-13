@@ -67,7 +67,6 @@ export default function App() {
     formData.append("image", selectedFile);
 
     try {
-      // === Envoyer le token JWT pour rattacher le scan à l'utilisateur ===
       const token = localStorage.getItem("sds_access_token");
       const response = await fetch("/api/scan", {
         method: "POST",
@@ -193,7 +192,7 @@ export default function App() {
         active !== "settings" && (
           <>
             <AmbientBackground />
-            <div className="relative z-10">
+            <div className="relative z-10 h-full">
               <AppLayout
                 active={active}
                 onNavigate={setActive}
@@ -202,16 +201,22 @@ export default function App() {
                 onSelectScan={setSearchedScan}
                 onSeeAll={handleSeeAll}
               >
-                <div className="flex h-full flex-col lg:flex-row">
-                  {/* Colonne principale */}
-                  <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto p-4 md:p-6">
-                    <Card>
-                      <CardContent className="flex flex-col gap-3 py-4 md:flex-row md:items-center md:justify-between">
+                {/* 
+                  Layout responsive :
+                  - Mobile (< lg) : colonne empilée + scroll global de la page
+                  - Desktop (>= lg) : 2 colonnes côte à côte, chacune scrollable
+                */}
+                <div className="flex h-full flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
+                  {/* Colonne principale - Zone de scan */}
+                  <div className="flex min-w-0 flex-1 flex-col gap-4 p-4 md:p-6 lg:min-h-0 lg:overflow-y-auto">
+                    {/* Barre stepper + boutons */}
+                    <Card className="shrink-0">
+                      <CardContent className="flex flex-col gap-3 py-3 md:py-4 xl:flex-row xl:items-center xl:justify-between">
                         <WorkflowStepper
                           currentStep={currentStep}
                           status={isLoading ? "processing" : result ? "done" : "idle"}
                         />
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 self-end xl:self-auto">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -219,7 +224,9 @@ export default function App() {
                             disabled={!selectedFile}
                           >
                             <RefreshCw className="h-3.5 w-3.5" />
-                            {t("common.reset")}
+                            <span className="hidden sm:inline">
+                              {t("common.reset")}
+                            </span>
                           </Button>
                           <Button
                             size="sm"
@@ -233,7 +240,8 @@ export default function App() {
                       </CardContent>
                     </Card>
 
-                    <Card className="flex-1 overflow-hidden">
+                    {/* Zone de drop / preview */}
+                    <Card className="min-h-[400px] flex-1 overflow-hidden">
                       <CardContent className="h-full p-0">
                         {selectedImage ? (
                           <DocumentPreview
@@ -252,8 +260,8 @@ export default function App() {
                     </Card>
                   </div>
 
-                  {/* Panneau latéral droit */}
-                  <aside className="w-full shrink-0 overflow-y-auto border-t border-border bg-surface/20 p-4 md:p-6 lg:w-[320px] lg:border-l lg:border-t-0 xl:w-[360px] 2xl:w-[400px]">
+                  {/* Panneau latéral - Informations extraites */}
+                  <aside className="w-full shrink-0 border-t border-border bg-surface/20 p-4 md:p-6 lg:h-full lg:w-[320px] lg:overflow-y-auto lg:border-l lg:border-t-0 xl:w-[360px] 2xl:w-[400px]">
                     <div className="mb-4">
                       <h2 className="text-sm font-semibold text-text-primary">
                         {t("scan.extractedInfo")}
@@ -263,7 +271,10 @@ export default function App() {
                       </p>
                     </div>
 
-                    <ExtractedFields data={result?.document || {}} loading={isLoading} />
+                    <ExtractedFields
+                      data={result?.document || {}}
+                      loading={isLoading}
+                    />
 
                     {result && (
                       <motion.div

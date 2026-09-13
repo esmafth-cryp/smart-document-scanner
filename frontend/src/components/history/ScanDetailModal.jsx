@@ -111,7 +111,7 @@ export function ScanDetailModal({ scan, onClose, onDelete }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-2 backdrop-blur-sm md:p-6"
           onClick={onClose}
         >
           <motion.div
@@ -120,24 +120,26 @@ export function ScanDetailModal({ scan, onClose, onDelete }) {
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative flex max-h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
+            className="relative flex max-h-[95vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
           >
             {/* Header */}
-            <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between border-b border-border bg-surface/95 px-6 py-4 backdrop-blur">
-              <div className="flex items-center gap-3">
-                <FileText className="h-4 w-4 text-primary" />
-                <div>
-                  <h2 className="text-sm font-semibold text-text-primary">
+            <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-2 border-b border-border bg-surface/95 px-3 py-3 backdrop-blur md:px-6 md:py-4">
+              <div className="flex min-w-0 items-center gap-2 md:gap-3">
+                <FileText className="h-4 w-4 shrink-0 text-primary" />
+                <div className="min-w-0">
+                  <h2 className="truncate text-sm font-semibold text-text-primary">
                     {t("detail.title")}
                   </h2>
-                  <p className="text-[11px] text-text-muted">{scan.original_filename}</p>
+                  <p className="truncate text-[11px] text-text-muted">
+                    {scan.original_filename}
+                  </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-1 md:gap-2">
                 <div className="group relative">
                   <Button variant="secondary" size="sm">
                     <Download className="h-3.5 w-3.5" />
-                    {t("detail.export")}
+                    <span className="hidden sm:inline">{t("detail.export")}</span>
                   </Button>
                   <div className="invisible absolute right-0 top-full z-20 mt-1 w-36 overflow-hidden rounded-lg border border-border bg-surface-2 opacity-0 shadow-xl transition-all group-hover:visible group-hover:opacity-100">
                     {["json", "csv", "xlsx"].map((fmt) => (
@@ -161,10 +163,10 @@ export function ScanDetailModal({ scan, onClose, onDelete }) {
             </div>
 
             {/* Body */}
-            <div className="flex w-full gap-6 overflow-y-auto p-6 pb-24 pt-20">
+            <div className="flex w-full flex-col gap-4 overflow-y-auto p-3 pb-32 pt-20 md:gap-6 md:p-6 md:pb-24 md:pt-20 lg:flex-row">
               {/* Image */}
-              <div className="w-1/2 shrink-0">
-                <div className="sticky top-6 rounded-xl border border-border bg-surface/30 p-4">
+              <div className="w-full shrink-0 lg:w-1/2">
+                <div className="rounded-xl border border-border bg-surface/30 p-3 md:sticky md:top-6 md:p-4">
                   {detail?.saved_filename ? (
                     <img
                       src={`/api/uploads/${detail.saved_filename}`}
@@ -183,7 +185,7 @@ export function ScanDetailModal({ scan, onClose, onDelete }) {
               </div>
 
               {/* Fields */}
-              <div className="flex-1 space-y-5">
+              <div className="min-w-0 flex-1 space-y-4 md:space-y-5">
                 {loading ? (
                   <div className="flex items-center justify-center py-20">
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -217,7 +219,7 @@ export function ScanDetailModal({ scan, onClose, onDelete }) {
                           {t("detail.extractedInfo")}
                         </h3>
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         {Object.entries(detail.extracted || {}).map(([key, obj]) => {
                           const value = obj.validated || obj.raw || "";
                           const isEditing = key in edits;
@@ -269,7 +271,7 @@ export function ScanDetailModal({ scan, onClose, onDelete }) {
             </div>
 
             {/* Footer */}
-            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 border-t border-border bg-surface/95 px-6 py-3 backdrop-blur">
+            <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 border-t border-border bg-surface/95 px-3 py-3 backdrop-blur md:flex-row md:items-center md:justify-between md:px-6">
               <div className="flex items-center gap-3">
                 {onDelete && detail && (
                   <Button
@@ -279,7 +281,7 @@ export function ScanDetailModal({ scan, onClose, onDelete }) {
                     className="text-danger hover:bg-danger/10 hover:text-danger"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                    {t("history.delete")}
+                    <span className="hidden sm:inline">{t("history.delete")}</span>
                   </Button>
                 )}
                 <p className="text-[11px] text-text-muted">
@@ -292,6 +294,7 @@ export function ScanDetailModal({ scan, onClose, onDelete }) {
                 onClick={handleValidate}
                 disabled={!hasChanges || saving}
                 isLoading={saving}
+                className="w-full md:w-auto"
               >
                 {!saving && <Save className="h-3.5 w-3.5" />}
                 {t("detail.validateAndSave")}

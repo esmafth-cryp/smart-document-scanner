@@ -98,7 +98,7 @@ export function History() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-y-auto p-6">
+    <div className="flex flex-col gap-4 p-4 md:p-6">
       <Card>
         <CardContent className="flex flex-col gap-4 py-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -108,7 +108,8 @@ export function History() {
                 {t("history.scansList")}
               </h1>
               <span className="rounded-full border border-border px-2 py-0.5 text-[10px] text-text-muted">
-                {total} {total === 1 ? t("history.document") : t("history.documents")}
+                {total}{" "}
+                {total === 1 ? t("history.document") : t("history.documents")}
               </span>
             </div>
 
