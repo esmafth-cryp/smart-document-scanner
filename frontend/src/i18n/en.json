@@ -19,7 +19,8 @@
     "next": "Next",
     "previous": "Previous",
     "all": "All",
-    "none": "None"
+    "none": "None",
+    "confirm": "Confirmation"
   },
   "roles": {
     "admin": "Administrator",
@@ -144,7 +145,12 @@
     "allStatuses": "All statuses",
     "allTypes": "All types",
     "noResults": "No scans yet",
-    "emptyHint": "Scan a document to see it appear here."
+    "emptyHint": "Scan a document to see it appear here.",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Delete this scan?",
+    "deleteConfirmDesc": "This action cannot be undone. The document and all its data will be permanently deleted.",
+    "deleted": "Scan deleted successfully",
+    "deleteError": "Delete error"
   },
   "calendar": {
     "tableView": "Table",
@@ -244,6 +250,7 @@
     "recentCount": "{{count}} recent notification(s)",
     "scanCreate": "New scan",
     "scanValidate": "Scan validated",
+    "scanDelete": "Scan deleted",
     "userCreate": "New user created",
     "userUpdate": "User updated",
     "userDelete": "User deleted"

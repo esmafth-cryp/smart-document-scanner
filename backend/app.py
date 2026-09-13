@@ -161,12 +161,23 @@ def create_app():
         scan_id = None
         try:
             from services.scan_service import save_scan
+            from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+
+            # === Récupérer l'utilisateur connecté (via JWT) ===
+            user_id = None
+            try:
+                verify_jwt_in_request(optional=True)
+                user_id = get_jwt_identity()
+            except Exception:
+                pass
+
             scan = save_scan(
                 original_filename=original_filename,
                 saved_filename=saved_filename,
                 document_data=document_data,
                 raw_text=ocr_result.get("text", ""),
                 lines=ocr_result.get("lines", []),
+                user_id=user_id,
             )
             scan_id = scan.id
         except Exception as error:

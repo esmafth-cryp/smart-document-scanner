@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Sun, Moon, User, LogOut, ChevronDown, HelpCircle } from "lucide-react";
+import { Sun, Moon, User, LogOut, ChevronDown, HelpCircle, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -8,7 +8,7 @@ import { NotificationsDropdown } from "./NotificationsDropdown";
 import { GlobalSearch } from "./GlobalSearch";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
-export function Header({ title, subtitle, onSelectScan, onSeeAll }) {
+export function Header({ title, subtitle, onSelectScan, onSeeAll, onMenuClick }) {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { resetTour } = useOnboarding();
@@ -27,13 +27,28 @@ export function Header({ title, subtitle, onSelectScan, onSeeAll }) {
   }, []);
 
   return (
-    <header className="relative z-40 flex h-16 items-center justify-between border-b border-border bg-surface/30 px-6 backdrop-blur-sm">
-      <div className="min-w-0">
-        <h1 className="truncate text-base font-semibold text-text-primary">{title}</h1>
-        {subtitle && <p className="truncate text-xs text-text-muted">{subtitle}</p>}
+    <header className="relative z-40 flex h-16 items-center justify-between gap-2 border-b border-border bg-surface/30 px-3 backdrop-blur-sm md:px-6">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <button
+          onClick={onMenuClick}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary lg:hidden"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+
+        <div className="min-w-0 flex-1 lg:flex-none">
+          <h1 className="truncate text-sm font-semibold text-text-primary md:text-base">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="hidden truncate text-xs text-text-muted md:block">
+              {subtitle}
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1 md:gap-2 lg:gap-3">
         <GlobalSearch onSelectScan={onSelectScan} onSeeAll={onSeeAll} />
 
         <LanguageSwitcher />
@@ -43,7 +58,7 @@ export function Header({ title, subtitle, onSelectScan, onSeeAll }) {
         <button
           onClick={resetTour}
           title={t("onboarding.restart")}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary"
+          className="hidden h-9 w-9 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary md:flex"
         >
           <HelpCircle className="h-4 w-4" />
         </button>
@@ -52,7 +67,7 @@ export function Header({ title, subtitle, onSelectScan, onSeeAll }) {
           onClick={toggleTheme}
           data-tour="theme"
           title={theme === "dark" ? t("theme.lightMode") : t("theme.darkMode")}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary"
+          className="hidden h-9 w-9 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary sm:flex"
         >
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
@@ -66,7 +81,7 @@ export function Header({ title, subtitle, onSelectScan, onSeeAll }) {
               <User className="h-4 w-4 text-primary" />
             </div>
             <ChevronDown
-              className={`mr-1 h-3 w-3 text-text-muted transition-transform ${
+              className={`mr-1 hidden h-3 w-3 text-text-muted transition-transform md:block ${
                 open ? "rotate-180" : ""
               }`}
             />

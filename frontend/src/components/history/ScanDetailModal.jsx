@@ -8,6 +8,7 @@ import {
   Image as ImageIcon,
   Edit3,
   Save,
+  Trash2,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
@@ -29,7 +30,7 @@ const FIELD_KEYS = [
   "company",
 ];
 
-export function ScanDetailModal({ scan, onClose }) {
+export function ScanDetailModal({ scan, onClose, onDelete }) {
   const { t } = useTranslation();
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -121,6 +122,7 @@ export function ScanDetailModal({ scan, onClose }) {
             onClick={(e) => e.stopPropagation()}
             className="relative flex max-h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
           >
+            {/* Header */}
             <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between border-b border-border bg-surface/95 px-6 py-4 backdrop-blur">
               <div className="flex items-center gap-3">
                 <FileText className="h-4 w-4 text-primary" />
@@ -158,7 +160,9 @@ export function ScanDetailModal({ scan, onClose }) {
               </div>
             </div>
 
+            {/* Body */}
             <div className="flex w-full gap-6 overflow-y-auto p-6 pb-24 pt-20">
+              {/* Image */}
               <div className="w-1/2 shrink-0">
                 <div className="sticky top-6 rounded-xl border border-border bg-surface/30 p-4">
                   {detail?.saved_filename ? (
@@ -178,6 +182,7 @@ export function ScanDetailModal({ scan, onClose }) {
                 </div>
               </div>
 
+              {/* Fields */}
               <div className="flex-1 space-y-5">
                 {loading ? (
                   <div className="flex items-center justify-center py-20">
@@ -263,12 +268,26 @@ export function ScanDetailModal({ scan, onClose }) {
               </div>
             </div>
 
-            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between border-t border-border bg-surface/95 px-6 py-3 backdrop-blur">
-              <p className="text-[11px] text-text-muted">
-                {hasChanges
-                  ? t("detail.changesCount", { count: Object.keys(edits).length })
-                  : t("detail.noChanges")}
-              </p>
+            {/* Footer */}
+            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 border-t border-border bg-surface/95 px-6 py-3 backdrop-blur">
+              <div className="flex items-center gap-3">
+                {onDelete && detail && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onDelete(detail)}
+                    className="text-danger hover:bg-danger/10 hover:text-danger"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    {t("history.delete")}
+                  </Button>
+                )}
+                <p className="text-[11px] text-text-muted">
+                  {hasChanges
+                    ? t("detail.changesCount", { count: Object.keys(edits).length })
+                    : t("detail.noChanges")}
+                </p>
+              </div>
               <Button
                 onClick={handleValidate}
                 disabled={!hasChanges || saving}

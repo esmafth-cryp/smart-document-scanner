@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 
@@ -12,7 +12,12 @@ export function AppLayout({
   onSeeAll,
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [dark, setDark] = useState(true);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [active]);
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background text-text-primary">
@@ -21,6 +26,8 @@ export function AppLayout({
         onNavigate={onNavigate}
         collapsed={collapsed}
         onToggle={() => setCollapsed((c) => !c)}
+        isMobileOpen={mobileOpen}
+        onMobileClose={() => setMobileOpen(false)}
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -31,8 +38,9 @@ export function AppLayout({
           onToggleTheme={() => setDark((d) => !d)}
           onSelectScan={onSelectScan}
           onSeeAll={onSeeAll}
+          onMenuClick={() => setMobileOpen(true)}
         />
-        <main className="flex-1 overflow-hidden">{children}</main>
+        <main className="flex-1 overflow-auto">{children}</main>
       </div>
     </div>
   );

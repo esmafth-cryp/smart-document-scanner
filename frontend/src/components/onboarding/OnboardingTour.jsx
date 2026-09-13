@@ -1,12 +1,10 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ChevronLeft, X, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useOnboarding } from "../../contexts/OnboardingContext";
-import { Button } from "../ui/Button";
 
-// Les 8 étapes — chaque étape cible un élément via un sélecteur CSS
 const STEPS = [
   {
     key: "sidebar",
@@ -14,6 +12,7 @@ const STEPS = [
     titleKey: "onboarding.sidebar.title",
     descKey: "onboarding.sidebar.desc",
     position: "right",
+    mobileSkip: true,
   },
   {
     key: "search",
@@ -21,6 +20,7 @@ const STEPS = [
     titleKey: "onboarding.search.title",
     descKey: "onboarding.search.desc",
     position: "bottom",
+    mobileSkip: true,
   },
   {
     key: "language",
@@ -35,6 +35,7 @@ const STEPS = [
     titleKey: "onboarding.theme.title",
     descKey: "onboarding.theme.desc",
     position: "bottom",
+    mobileSkip: true,
   },
   {
     key: "notifications",
@@ -49,6 +50,7 @@ const STEPS = [
     titleKey: "onboarding.scan.title",
     descKey: "onboarding.scan.desc",
     position: "right",
+    mobileSkip: true,
   },
   {
     key: "chat",
@@ -63,6 +65,7 @@ const STEPS = [
     titleKey: "onboarding.dashboard.title",
     descKey: "onboarding.dashboard.desc",
     position: "right",
+    mobileSkip: true,
   },
 ];
 
@@ -71,29 +74,67 @@ export function OnboardingTour() {
   const { isOpen, stepIndex, nextStep, prevStep, stopTour } = useOnboarding();
   const [rect, setRect] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+  const retryRef = useRef(null);
 
-  const currentStep = STEPS[stepIndex];
-  const isLast = stepIndex === STEPS.length - 1;
+  // Détecte si on est sur mobile
+  useEffect(() => {
+    function checkMobile() {
+      setIsMobile(window.innerWidth < 1024);
+    }
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Filtrer les étapes selon le device
+  const visibleSteps = STEPS.filter(
+    (s) => !(isMobile && s.mobileSkip)
+  );
+
+  const currentStep = visibleSteps[stepIndex];
+  const isLast = stepIndex === visibleSteps.length - 1;
 
   // Calcule la position de l'élément cible
   const updatePosition = useCallback(() => {
     if (!isOpen || !currentStep) return;
+
     const el = document.querySelector(currentStep.target);
+
     if (!el) {
-      // Élément non trouvé : on passe à l'étape suivante
-      if (stepIndex < STEPS.length - 1) {
-        nextStep();
-      } else {
-        stopTour();
-      }
+      // Élément non trouvé : on attend 500ms et on réessaie
+      // Si toujours pas trouvé après 3 tentatives, on skip
+      let attempts = 0;
+      const tryFind = () => {
+        attempts++;
+        const el2 = document.querySelector(currentStep.target);
+        if (el2) {
+          updatePositionWithElement(el2);
+        } else if (attempts < 3) {
+          retryRef.current = setTimeout(tryFind, 500);
+        } else {
+          // Skip après 3 tentatives
+          if (stepIndex < visibleSteps.length - 1) {
+            nextStep();
+          } else {
+            stopTour();
+          }
+        }
+      };
+      retryRef.current = setTimeout(tryFind, 500);
       return;
     }
 
+    updatePositionWithElement(el);
+  }, [isOpen, currentStep, stepIndex, visibleSteps.length, nextStep, stopTour]);
+
+  function updatePositionWithElement(el) {
     // Scroll l'élément en vue
     el.scrollIntoView({ behavior: "smooth", block: "center" });
 
     const r = el.getBoundingClientRect();
     const padding = 8;
+
     setRect({
       top: r.top - padding,
       left: r.left - padding,
@@ -101,27 +142,32 @@ export function OnboardingTour() {
       height: r.height + padding * 2,
     });
 
-    // Position du tooltip en fonction du positionnement demandé
-    const TOOLTIP_W = 320;
-    const TOOLTIP_H = 180;
+    // Position du tooltip
+    const TOOLTIP_W = Math.min(320, window.innerWidth - 32);
+    const TOOLTIP_H = 200;
     const gap = 16;
     let top, left;
 
     if (currentStep.position === "right") {
       top = r.top + r.height / 2 - TOOLTIP_H / 2;
       left = r.right + gap;
+      // Si ça dépasse à droite, on met en dessous
+      if (left + TOOLTIP_W > window.innerWidth - 16) {
+        top = r.bottom + gap;
+        left = r.left + r.width / 2 - TOOLTIP_W / 2;
+      }
     } else if (currentStep.position === "bottom") {
       top = r.bottom + gap;
       left = r.left + r.width / 2 - TOOLTIP_W / 2;
     } else if (currentStep.position === "top") {
       top = r.top - TOOLTIP_H - gap;
       left = r.left + r.width / 2 - TOOLTIP_W / 2;
-    } else if (currentStep.position === "left") {
+    } else {
       top = r.top + r.height / 2 - TOOLTIP_H / 2;
       left = r.left - TOOLTIP_W - gap;
     }
 
-    // Empêcher que le tooltip dépasse de l'écran
+    // Empêcher le dépassement de l'écran
     if (left < 16) left = 16;
     if (left + TOOLTIP_W > window.innerWidth - 16) {
       left = window.innerWidth - TOOLTIP_W - 16;
@@ -132,7 +178,7 @@ export function OnboardingTour() {
     }
 
     setTooltipPos({ top, left });
-  }, [isOpen, currentStep, stepIndex, nextStep, stopTour]);
+  }
 
   useEffect(() => {
     updatePosition();
@@ -141,10 +187,11 @@ export function OnboardingTour() {
     return () => {
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
+      if (retryRef.current) clearTimeout(retryRef.current);
     };
   }, [updatePosition]);
 
-  // Touche Échap pour fermer
+  // Clavier : Échap, flèches
   useEffect(() => {
     function onKey(e) {
       if (e.key === "Escape") stopTour();
@@ -181,7 +228,7 @@ export function OnboardingTour() {
           }}
         />
 
-        {/* Clic sur l'overlay = fermer */}
+        {/* Overlay clickable pour fermer */}
         <div
           className="absolute inset-0"
           onClick={stopTour}
@@ -195,7 +242,7 @@ export function OnboardingTour() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 8, scale: 0.95 }}
           transition={{ duration: 0.2 }}
-          className="absolute w-[320px] overflow-hidden rounded-xl border border-border-strong bg-surface shadow-[0_20px_60px_-10px_rgba(0,0,0,0.8)]"
+          className="absolute w-[320px] max-w-[calc(100vw-32px)] overflow-hidden rounded-xl border border-border-strong bg-surface shadow-[0_20px_60px_-10px_rgba(0,0,0,0.8)]"
           style={{
             top: tooltipPos.top,
             left: tooltipPos.left,
@@ -210,7 +257,7 @@ export function OnboardingTour() {
                 <Sparkles className="h-3 w-3 text-white" />
               </div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                {stepIndex + 1} / {STEPS.length}
+                {stepIndex + 1} / {visibleSteps.length}
               </span>
             </div>
             <button

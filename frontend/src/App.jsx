@@ -67,7 +67,13 @@ export default function App() {
     formData.append("image", selectedFile);
 
     try {
-      const response = await fetch("/api/scan", { method: "POST", body: formData });
+      // === Envoyer le token JWT pour rattacher le scan à l'utilisateur ===
+      const token = localStorage.getItem("sds_access_token");
+      const response = await fetch("/api/scan", {
+        method: "POST",
+        body: formData,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || t("common.error"));
       setResult(data);
@@ -196,10 +202,11 @@ export default function App() {
                 onSelectScan={setSearchedScan}
                 onSeeAll={handleSeeAll}
               >
-                <div className="flex h-full">
-                  <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto p-6">
+                <div className="flex h-full flex-col lg:flex-row">
+                  {/* Colonne principale */}
+                  <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto p-4 md:p-6">
                     <Card>
-                      <CardContent className="flex items-center justify-between py-4">
+                      <CardContent className="flex flex-col gap-3 py-4 md:flex-row md:items-center md:justify-between">
                         <WorkflowStepper
                           currentStep={currentStep}
                           status={isLoading ? "processing" : result ? "done" : "idle"}
@@ -237,7 +244,7 @@ export default function App() {
                             <ProcessingOverlay isRunning={isLoading} isDone={!!result} />
                           </DocumentPreview>
                         ) : (
-                          <div className="h-full p-6">
+                          <div className="h-full p-4 md:p-6">
                             <DropZone onFile={handleFile} />
                           </div>
                         )}
@@ -245,7 +252,8 @@ export default function App() {
                     </Card>
                   </div>
 
-                  <aside className="w-[400px] shrink-0 overflow-y-auto border-l border-border bg-surface/20 p-6">
+                  {/* Panneau latéral droit */}
+                  <aside className="w-full shrink-0 overflow-y-auto border-t border-border bg-surface/20 p-4 md:p-6 lg:w-[320px] lg:border-l lg:border-t-0 xl:w-[360px] 2xl:w-[400px]">
                     <div className="mb-4">
                       <h2 className="text-sm font-semibold text-text-primary">
                         {t("scan.extractedInfo")}

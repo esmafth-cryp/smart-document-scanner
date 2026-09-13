@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { FileText, LayoutList, Calendar } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
 
 import { Card, CardContent } from "../components/ui/Card";
 import { ScanFilters } from "../components/history/ScanFilters";
 import { ScansTable } from "../components/history/ScansTable";
 import { ScanCalendar } from "../components/history/ScanCalendar";
 import { ScanDetailModal } from "../components/history/ScanDetailModal";
-import { fetchScans } from "../api/scans";
+import { ConfirmModal } from "../components/ui/ConfirmModal";
+import { fetchScans, deleteScan } from "../api/scans";
 
 export function History() {
   const { t } = useTranslation();
@@ -22,8 +24,12 @@ export function History() {
   const [status, setStatus] = useState("");
   const [documentType, setDocumentType] = useState("");
 
-  const [view, setView] = useState("table"); // "table" ou "calendar"
+  const [view, setView] = useState("table");
   const [selectedScan, setSelectedScan] = useState(null);
+
+  // État pour la suppression
+  const [scanToDelete, setScanToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("sds_search");
@@ -43,7 +49,6 @@ export function History() {
 
   const loadScans = useCallback(() => {
     setLoading(true);
-    // En mode calendrier, on charge jusqu'à 500 scans (pour couvrir plusieurs mois)
     const perPage = view === "calendar" ? 500 : 20;
     fetchScans({
       page: view === "calendar" ? 1 : page,
@@ -76,11 +81,27 @@ export function History() {
     setPage(1);
   }
 
+  async function handleConfirmDelete() {
+    if (!scanToDelete) return;
+    setDeleting(true);
+    try {
+      await deleteScan(scanToDelete.id);
+      toast.success(t("history.deleted"));
+      setScanToDelete(null);
+      setSelectedScan(null);
+      loadScans();
+    } catch (err) {
+      toast.error(err.message || t("history.deleteError"));
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="flex h-full flex-col gap-4 overflow-y-auto p-6">
       <Card>
         <CardContent className="flex flex-col gap-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
               <h1 className="text-sm font-semibold text-text-primary">
@@ -91,8 +112,7 @@ export function History() {
               </span>
             </div>
 
-            {/* Toggle Tableau / Calendrier */}
-            <div className="flex rounded-lg border border-border bg-surface-2/40 p-1">
+            <div className="flex rounded-lg border border-border bg-surface-2/40 p-1 self-start md:self-auto">
               <button
                 onClick={() => setView("table")}
                 className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-medium transition-colors ${
@@ -138,7 +158,12 @@ export function History() {
 
       {view === "table" ? (
         <>
-          <ScansTable scans={scans} loading={loading} onRowClick={setSelectedScan} />
+          <ScansTable
+            scans={scans}
+            loading={loading}
+            onRowClick={setSelectedScan}
+            onDelete={setScanToDelete}
+          />
 
           {pages > 1 && (
             <div className="flex items-center justify-center gap-2 pt-2">
@@ -166,7 +191,26 @@ export function History() {
         <ScanCalendar scans={scans} />
       )}
 
-      <ScanDetailModal scan={selectedScan} onClose={() => setSelectedScan(null)} />
+      <ScanDetailModal
+        scan={selectedScan}
+        onClose={() => setSelectedScan(null)}
+        onDelete={(scan) => {
+          setSelectedScan(null);
+          setScanToDelete(scan);
+        }}
+      />
+
+      <ConfirmModal
+        open={!!scanToDelete}
+        title={t("history.deleteConfirmTitle")}
+        description={t("history.deleteConfirmDesc")}
+        confirmLabel={t("common.delete")}
+        cancelLabel={t("common.cancel")}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setScanToDelete(null)}
+        isLoading={deleting}
+        variant="danger"
+      />
     </div>
   );
 }

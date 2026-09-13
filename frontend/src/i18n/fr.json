@@ -19,7 +19,8 @@
     "next": "Suivant",
     "previous": "Précédent",
     "all": "Tous",
-    "none": "Aucun"
+    "none": "Aucun",
+    "confirm": "Confirmation"
   },
   "roles": {
     "admin": "Administrateur",
@@ -144,7 +145,12 @@
     "allStatuses": "Tous les statuts",
     "allTypes": "Tous les types",
     "noResults": "Aucun scan pour l'instant",
-    "emptyHint": "Scannez un document pour le voir apparaître ici."
+    "emptyHint": "Scannez un document pour le voir apparaître ici.",
+    "delete": "Supprimer",
+    "deleteConfirmTitle": "Supprimer ce scan ?",
+    "deleteConfirmDesc": "Cette action est irréversible. Le document et toutes ses données seront définitivement supprimés.",
+    "deleted": "Scan supprimé avec succès",
+    "deleteError": "Erreur lors de la suppression"
   },
   "calendar": {
     "tableView": "Tableau",
@@ -244,6 +250,7 @@
     "recentCount": "{{count}} notification(s) récente(s)",
     "scanCreate": "Nouveau scan",
     "scanValidate": "Scan validé",
+    "scanDelete": "Scan supprimé",
     "userCreate": "Nouvel utilisateur créé",
     "userUpdate": "Utilisateur modifié",
     "userDelete": "Utilisateur supprimé"

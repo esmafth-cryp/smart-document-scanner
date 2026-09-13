@@ -86,7 +86,7 @@ export function GlobalSearch({ onSelectScan, onSeeAll }) {
           }}
           onFocus={() => setOpen(true)}
           placeholder={t("search.placeholder")}
-          className="h-9 w-72 rounded-lg border border-border bg-surface-2/50 pl-9 pr-8 text-sm text-text-primary placeholder:text-text-muted focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
+          className="h-9 w-40 rounded-lg border border-border bg-surface-2/50 pl-9 pr-8 text-xs text-text-primary placeholder:text-text-muted focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 lg:w-56 lg:text-sm xl:w-72"
         />
         {query && (
           <button
@@ -108,7 +108,7 @@ export function GlobalSearch({ onSelectScan, onSeeAll }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full z-[100] mt-2 w-96 overflow-hidden rounded-xl border border-border-strong bg-surface shadow-[0_20px_60px_-10px_rgba(0,0,0,0.4)]"
+            className="absolute right-0 top-full z-[100] mt-2 w-80 overflow-hidden rounded-xl border border-border-strong bg-surface shadow-[0_20px_60px_-10px_rgba(0,0,0,0.4)] lg:w-96"
           >
             <div className="border-b border-border px-4 py-2.5">
               <p className="text-[10px] uppercase tracking-wider text-text-muted">

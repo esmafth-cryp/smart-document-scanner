@@ -1,4 +1,4 @@
-import { FileText, Eye, Clock, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { FileText, Eye, Clock, CheckCircle2, XCircle, AlertCircle, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Badge } from "../ui/Badge";
@@ -49,7 +49,7 @@ function formatDate(iso, lang) {
   });
 }
 
-export function ScansTable({ scans, loading, onRowClick }) {
+export function ScansTable({ scans, loading, onRowClick, onDelete }) {
   const { t, i18n } = useTranslation();
 
   if (loading) {
@@ -83,13 +83,13 @@ export function ScansTable({ scans, loading, onRowClick }) {
             <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
               {t("history.file")}
             </th>
-            <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
+            <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted md:table-cell">
               {t("history.documentType")}
             </th>
             <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
               {t("history.status")}
             </th>
-            <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted">
+            <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted lg:table-cell">
               {t("history.confidence")}
             </th>
             <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider text-text-muted">
@@ -112,13 +112,13 @@ export function ScansTable({ scans, loading, onRowClick }) {
               </td>
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <FileText className="h-3.5 w-3.5 text-primary" />
+                  <FileText className="h-3.5 w-3.5 shrink-0 text-primary" />
                   <span className="truncate text-xs text-text-primary" title={scan.original_filename}>
                     {scan.original_filename}
                   </span>
                 </div>
               </td>
-              <td className="px-4 py-3">
+              <td className="hidden px-4 py-3 md:table-cell">
                 {scan.document_type ? (
                   <span className="text-xs text-text-secondary">{scan.document_type.label}</span>
                 ) : (
@@ -128,20 +128,34 @@ export function ScansTable({ scans, loading, onRowClick }) {
               <td className="px-4 py-3">
                 <StatusBadge status={scan.status} />
               </td>
-              <td className="px-4 py-3">
+              <td className="hidden px-4 py-3 lg:table-cell">
                 <ConfidenceBar value={scan.ocr_confidence} />
               </td>
               <td className="px-4 py-3 text-right">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onRowClick(scan);
-                  }}
-                  className="rounded p-1.5 text-text-muted transition-colors hover:bg-white/5 hover:text-primary"
-                  title={t("history.viewDetail")}
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                </button>
+                <div className="flex justify-end gap-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRowClick(scan);
+                    }}
+                    className="rounded p-1.5 text-text-muted transition-colors hover:bg-white/5 hover:text-primary"
+                    title={t("history.viewDetail")}
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                  </button>
+                  {onDelete && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(scan);
+                      }}
+                      className="rounded p-1.5 text-text-muted transition-colors hover:bg-danger/10 hover:text-danger"
+                      title={t("history.delete")}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
               </td>
             </motion.tr>
           ))}
