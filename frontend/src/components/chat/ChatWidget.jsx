@@ -33,14 +33,12 @@ export function ChatWidget() {
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Scroll auto en bas
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, loading]);
 
-  // Focus input à l'ouverture
   useEffect(() => {
     if (open && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 200);
@@ -96,8 +94,6 @@ export function ChatWidget() {
     });
   }
 
-  // Le welcome est TOUJOURS affiché en premier, directement depuis t()
-  // → Il se met à jour automatiquement quand la langue change
   const hasUserMessages = messages.length > 0;
 
   return (
@@ -105,6 +101,7 @@ export function ChatWidget() {
       {/* Bulle flottante */}
       <button
         onClick={() => setOpen((o) => !o)}
+        data-tour="chat"
         className="fixed bottom-6 right-6 z-[150] flex h-14 w-14 items-center justify-center rounded-full gradient-primary shadow-lg shadow-primary/40 transition-transform hover:scale-110"
         title={t("chat.open")}
       >
@@ -149,7 +146,6 @@ export function ChatWidget() {
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="fixed bottom-24 right-6 z-[150] flex h-[500px] w-[380px] flex-col overflow-hidden rounded-2xl border border-border-strong bg-surface shadow-[0_20px_60px_-10px_rgba(0,0,0,0.6)]"
           >
-            {/* Header */}
             <div className="flex items-center gap-2 border-b border-border bg-surface/95 px-4 py-3 backdrop-blur">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
                 <Sparkles className="h-4 w-4 text-white" />
@@ -170,9 +166,7 @@ export function ChatWidget() {
               </button>
             </div>
 
-            {/* Messages */}
             <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
-              {/* Welcome TOUJOURS affiché en direct (pas dans le state) */}
               <div className="flex gap-2 justify-start">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
                   <Bot className="h-3.5 w-3.5 text-primary" />
@@ -182,7 +176,6 @@ export function ChatWidget() {
                 </div>
               </div>
 
-              {/* Messages de la conversation */}
               {messages.map((m, i) => (
                 <div
                   key={i}
@@ -216,7 +209,6 @@ export function ChatWidget() {
                 </div>
               ))}
 
-              {/* Typing indicator */}
               {loading && (
                 <div className="flex gap-2">
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
@@ -231,7 +223,6 @@ export function ChatWidget() {
               )}
             </div>
 
-            {/* Suggestions - affichées seulement si pas de messages utilisateur */}
             {!hasUserMessages && !loading && (
               <div className="border-t border-border bg-surface/50 px-3 py-2">
                 <p className="mb-1.5 text-[9px] uppercase tracking-wider text-text-muted">
@@ -251,7 +242,6 @@ export function ChatWidget() {
               </div>
             )}
 
-            {/* Input */}
             <div className="flex items-end gap-2 border-t border-border bg-surface/95 p-3 backdrop-blur">
               <textarea
                 ref={inputRef}

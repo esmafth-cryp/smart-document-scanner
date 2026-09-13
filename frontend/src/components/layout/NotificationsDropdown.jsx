@@ -98,7 +98,7 @@ export function NotificationsDropdown() {
   }
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative" ref={ref} data-tour="notifications">
       <button
         onClick={() => setOpen((o) => !o)}
         className="relative flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary"

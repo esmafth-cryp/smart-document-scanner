@@ -3,56 +3,160 @@
   <head>
     <meta charset="UTF-8" />
     <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
       body {
         width: 340px;
-        font-family: -apple-system, system-ui, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
         background: #0B0F1A;
         color: #F8FAFC;
         padding: 16px;
+        -webkit-font-smoothing: antialiased;
       }
+
       .header {
-        display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
       }
+
       .logo {
-        width: 32px; height: 32px; border-radius: 8px;
-        background: linear-gradient(135deg, #6366F1, #8B5CF6);
-        display: flex; align-items: center; justify-content: center;
-        font-weight: 700; color: #fff;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.5);
       }
-      h1 { font-size: 14px; font-weight: 600; }
-      p.sub { font-size: 11px; color: #94A3B8; }
+
+      .logo svg {
+        width: 20px;
+        height: 20px;
+        color: #fff;
+        fill: currentColor;
+      }
+
+      h1 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #F8FAFC;
+        line-height: 1.2;
+      }
+
+      p.sub {
+        font-size: 10px;
+        color: #64748B;
+        margin-top: 2px;
+      }
+
       button {
-        width: 100%; padding: 10px; border: none; border-radius: 8px;
-        background: linear-gradient(135deg, #6366F1, #8B5CF6);
-        color: #fff; font-weight: 500; font-size: 13px; cursor: pointer;
-        transition: opacity 0.15s;
+        width: 100%;
+        padding: 11px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: opacity 0.15s, transform 0.1s;
+        box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.4);
       }
-      button:hover { opacity: 0.9; }
-      button:disabled { opacity: 0.5; cursor: not-allowed; }
-      #status { margin-top: 12px; font-size: 11px; color: #94A3B8; min-height: 16px; }
+
+      button:hover:not(:disabled) {
+        opacity: 0.92;
+        transform: translateY(-1px);
+      }
+
+      button:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      #status {
+        margin-top: 12px;
+        font-size: 11px;
+        color: #94A3B8;
+        min-height: 16px;
+        text-align: center;
+      }
+
+      #status.success {
+        color: #10B981;
+        font-weight: 600;
+      }
+
+      #status.error {
+        color: #EF4444;
+        font-weight: 600;
+      }
+
       #result {
-        margin-top: 12px; padding: 10px; border-radius: 8px;
-        background: #131826; border: 1px solid rgba(255,255,255,0.06);
-        max-height: 200px; overflow-y: auto;
-        font-family: monospace; font-size: 10px;
-        white-space: pre-wrap; color: #94A3B8;
+        margin-top: 12px;
+        padding: 12px;
+        border-radius: 10px;
+        background: #131826;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        white-space: pre-wrap;
+        color: #94A3B8;
+        line-height: 1.5;
       }
-      .error { color: #EF4444; }
-      .success { color: #10B981; }
+
+      #result::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      #result::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.3);
+        border-radius: 3px;
+      }
+
+      .footer {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        text-align: center;
+        font-size: 9px;
+        color: #475569;
+      }
     </style>
   </head>
   <body>
     <div class="header">
-      <div class="logo">S</div>
+      <div class="logo">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2l2.9 6.9L22 10l-5.5 4.7L18.2 22 12 18.3 5.8 22l1.7-7.3L2 10l7.1-1.1L12 2z" />
+        </svg>
+      </div>
       <div>
         <h1>Smart Scanner</h1>
         <p class="sub">Marsa Maroc</p>
       </div>
     </div>
+
     <button id="capture">Capturer l'onglet actif</button>
     <div id="status"></div>
     <pre id="result"></pre>
+
+    <div class="footer">
+      © 2026 — Smart Document Scanner
+    </div>
+
     <script src="popup.js"></script>
   </body>
 </html>

@@ -32,6 +32,7 @@ export function Sidebar({ active = "scan", onNavigate, collapsed = false, onTogg
 
   return (
     <motion.aside
+      data-tour="sidebar"
       animate={{ width: collapsed ? 72 : 240 }}
       transition={{ duration: 0.2, ease: "easeInOut" }}
       className="flex h-full flex-col border-r border-border bg-surface/30 backdrop-blur-sm"
@@ -40,11 +41,7 @@ export function Sidebar({ active = "scan", onNavigate, collapsed = false, onTogg
       <div className="flex h-16 items-center justify-center border-b border-border px-4">
         {collapsed ? (
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg gradient-primary shadow-lg shadow-primary/20">
-            <svg
-              viewBox="0 0 24 24"
-              className="h-5 w-5 text-white"
-              fill="currentColor"
-            >
+            <svg viewBox="0 0 24 24" className="h-5 w-5 text-white" fill="currentColor">
               <path d="M12 2l2.9 6.9L22 10l-5.5 4.7L18.2 22 12 18.3 5.8 22l1.7-7.3L2 10l7.1-1.1L12 2z" />
             </svg>
           </div>
@@ -61,6 +58,7 @@ export function Sidebar({ active = "scan", onNavigate, collapsed = false, onTogg
           return (
             <button
               key={item.id}
+              data-tour={`nav-${item.id}`}
               onClick={() => onNavigate?.(item.id)}
               title={collapsed ? item.label : undefined}
               className={cn(

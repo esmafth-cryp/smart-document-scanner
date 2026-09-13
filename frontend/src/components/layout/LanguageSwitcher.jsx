@@ -30,7 +30,7 @@ export function LanguageSwitcher() {
   }
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative" ref={ref} data-tour="language">
       <button
         onClick={() => setOpen((o) => !o)}
         title={i18n.t("language.switch")}

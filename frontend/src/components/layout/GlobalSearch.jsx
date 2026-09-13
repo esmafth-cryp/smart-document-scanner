@@ -24,8 +24,8 @@ export function GlobalSearch({ onSelectScan, onSeeAll }) {
   }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => setDebounced(query), 300);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setDebounced(query), 300);
+    return () => clearTimeout(timer);
   }, [query]);
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export function GlobalSearch({ onSelectScan, onSeeAll }) {
   }
 
   return (
-    <div className="relative hidden md:block" ref={ref}>
+    <div className="relative hidden md:block" ref={ref} data-tour="search">
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
         <input

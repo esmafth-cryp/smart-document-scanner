@@ -234,7 +234,8 @@
     "passwordUpdated": "Password updated successfully",
     "passwordMismatch": "New passwords do not match",
     "passwordTooShort": "Password must be at least 6 characters",
-    "allFieldsRequired": "All fields are required"
+    "allFieldsRequired": "All fields are required",
+    "onboardingSub": "Replay the app guided tour"
   },
   "notifications": {
     "title": "Notifications",
@@ -272,5 +273,44 @@
     "placeholder": "Type your question...",
     "suggestions": "Suggestions",
     "error": "Sorry, an error occurred. Please try again."
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "next": "Next",
+    "previous": "Previous",
+    "finish": "Finish",
+    "restart": "Restart tour",
+    "sidebar": {
+      "title": "Main navigation",
+      "desc": "Use this bar to navigate between the dashboard, scanner, history, administration and settings."
+    },
+    "search": {
+      "title": "Global search",
+      "desc": "Quickly search through all your documents by filename or OCR content."
+    },
+    "language": {
+      "title": "Change language",
+      "desc": "Switch between French and English in one click."
+    },
+    "theme": {
+      "title": "Dark / light mode",
+      "desc": "Switch between dark and light theme according to your preferences."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "desc": "Get the latest actions performed on the platform."
+    },
+    "scan": {
+      "title": "Scan a document",
+      "desc": "Import an image from your computer or take a photo with the camera to launch OCR analysis."
+    },
+    "chat": {
+      "title": "AI Assistant",
+      "desc": "Ask questions in natural language about your documents and statistics."
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "desc": "View your KPIs, charts and recent activity at a glance."
+    }
   }
 }

@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { Sun, Moon, User, LogOut, ChevronDown } from "lucide-react";
+import { Sun, Moon, User, LogOut, ChevronDown, HelpCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useOnboarding } from "../../contexts/OnboardingContext";
 import { NotificationsDropdown } from "./NotificationsDropdown";
 import { GlobalSearch } from "./GlobalSearch";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -10,6 +11,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 export function Header({ title, subtitle, onSelectScan, onSeeAll }) {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { resetTour } = useOnboarding();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
@@ -39,10 +41,17 @@ export function Header({ title, subtitle, onSelectScan, onSeeAll }) {
         <NotificationsDropdown />
 
         <button
+          onClick={resetTour}
+          title={t("onboarding.restart")}
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary"
+        >
+          <HelpCircle className="h-4 w-4" />
+        </button>
+
+        <button
           onClick={toggleTheme}
-          title={
-            theme === "dark" ? t("theme.lightMode") : t("theme.darkMode")
-          }
+          data-tour="theme"
+          title={theme === "dark" ? t("theme.lightMode") : t("theme.darkMode")}
           className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary"
         >
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}

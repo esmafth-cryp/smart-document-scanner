@@ -234,7 +234,8 @@
     "passwordUpdated": "Mot de passe modifié avec succès",
     "passwordMismatch": "Les nouveaux mots de passe ne correspondent pas",
     "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
-    "allFieldsRequired": "Tous les champs sont requis"
+    "allFieldsRequired": "Tous les champs sont requis",
+    "onboardingSub": "Relancer la visite guidée de l'application"
   },
   "notifications": {
     "title": "Notifications",
@@ -272,5 +273,44 @@
     "placeholder": "Écrivez votre question...",
     "suggestions": "Suggestions",
     "error": "Désolé, une erreur est survenue. Réessayez."
+  },
+  "onboarding": {
+    "skip": "Passer",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "finish": "Terminer",
+    "restart": "Refaire la visite guidée",
+    "sidebar": {
+      "title": "Navigation principale",
+      "desc": "Utilisez cette barre pour naviguer entre le tableau de bord, le scanner, l'historique, l'administration et les paramètres."
+    },
+    "search": {
+      "title": "Recherche globale",
+      "desc": "Recherchez rapidement dans tous vos documents par nom de fichier ou contenu OCR."
+    },
+    "language": {
+      "title": "Changer de langue",
+      "desc": "Basculez entre le français et l'anglais en un clic."
+    },
+    "theme": {
+      "title": "Mode sombre / clair",
+      "desc": "Passez du thème sombre au thème clair selon vos préférences."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "desc": "Recevez les dernières actions effectuées sur la plateforme."
+    },
+    "scan": {
+      "title": "Scanner un document",
+      "desc": "Importez une image depuis votre ordinateur ou prenez une photo avec la caméra pour lancer l'analyse OCR."
+    },
+    "chat": {
+      "title": "Assistant IA",
+      "desc": "Posez des questions en langage naturel sur vos documents et statistiques."
+    },
+    "dashboard": {
+      "title": "Tableau de bord",
+      "desc": "Consultez vos KPIs, graphiques et l'activité récente en un coup d'œil."
+    }
   }
 }

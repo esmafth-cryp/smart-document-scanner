@@ -10,6 +10,7 @@ import {
   Cpu,
   Database,
   Code2,
+  PlayCircle,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
@@ -20,12 +21,14 @@ import { Input } from "../components/ui/Input";
 import { Badge } from "../components/ui/Badge";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useOnboarding } from "../contexts/OnboardingContext";
 import { changePassword } from "../api/auth";
 
 export function Settings() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { resetTour } = useOnboarding();
   const [pwd, setPwd] = useState({ old: "", new: "", confirm: "" });
   const [loading, setLoading] = useState(false);
   const [notifEnabled, setNotifEnabled] = useState(true);
@@ -58,7 +61,6 @@ export function Settings() {
 
   return (
     <div className="flex h-full flex-col gap-4 overflow-y-auto p-6">
-      {/* Profil */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
         <Card>
           <CardHeader>
@@ -105,10 +107,7 @@ export function Settings() {
                 <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-text-muted">
                   {t("settings.role")}
                 </label>
-                <Input
-                  value={user?.role ? t(`roles.${user.role}`) : ""}
-                  readOnly
-                />
+                <Input value={user?.role ? t(`roles.${user.role}`) : ""} readOnly />
               </div>
               <div>
                 <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-text-muted">
@@ -121,7 +120,6 @@ export function Settings() {
         </Card>
       </motion.div>
 
-      {/* Sécurité */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
         <Card>
           <CardHeader>
@@ -181,7 +179,6 @@ export function Settings() {
         </Card>
       </motion.div>
 
-      {/* Préférences */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Card>
           <CardHeader>
@@ -241,11 +238,26 @@ export function Settings() {
                 ))}
               </div>
             </div>
+
+            {/* Refaire la visite guidée */}
+            <div className="flex items-center justify-between rounded-lg border border-border bg-surface/40 p-3">
+              <div>
+                <p className="text-sm text-text-primary">
+                  {t("onboarding.restart")}
+                </p>
+                <p className="text-[11px] text-text-muted">
+                  {t("settings.onboardingSub")}
+                </p>
+              </div>
+              <Button size="sm" variant="secondary" onClick={resetTour}>
+                <PlayCircle className="h-3.5 w-3.5" />
+                {t("onboarding.restart")}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </motion.div>
 
-      {/* À propos */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
         <Card>
           <CardHeader>
